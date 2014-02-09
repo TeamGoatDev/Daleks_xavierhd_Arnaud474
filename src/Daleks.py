@@ -157,7 +157,7 @@ def deplacementJoueur(liste, largeur, hauteur, daleks):
             v_y = 0 
         
         #Determine is le deplacement sera a l'interieur de la zone de jeu
-        if(liste[0].x+v_x > largeur or liste[0].y+v_y > hauteur or liste[0].x+v_x < largeur or liste[0].y+v_y < hauteur)
+        if(liste[0].x+v_x > largeur or liste[0].y+v_y > hauteur or liste[0].x+v_x < 0 or liste[0].y+v_y < 0)
             deplacement_valide = false
 
         #Determine si il y a une piece sur l'endroit ou le joueur veut se deplacer
