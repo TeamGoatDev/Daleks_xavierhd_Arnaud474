@@ -70,7 +70,7 @@ class Jeu:
     def deplacerDalek(self,jeu):
         for i in range(1, self.nb_total_objets-1): #regarde tout les objets de la liste
                 if(isinstance(self.liste_objets[i], Dalek)): #recherche d_objet Dalek
-                    self.liste_objets[i].deplacer()
+                    self.liste_objets[i].deplacer(jeu)
     
     def denombreDalek(self):
         compteur = 0
@@ -151,8 +151,8 @@ class Jeu:
                             liste_a_POPER.append(i) #ajout a la liste de suppression
 
         for i in range(1, len(liste_a_POPER)-1):
-            self.jeu.liste_objets.append( Ferraille(self.jeu.liste_objets[liste_a_POPER[i]].x, self.jeu.liste_objets[liste_a_POPER[i]].y) )
-            self.jeu.liste_objets.pop(liste_a_POPER[i])
+            self.liste_objets.append( Ferraille(self.liste_objets[liste_a_POPER[i]].x, self.liste_objets[liste_a_POPER[i]].y) )
+            self.liste_objets.pop(liste_a_POPER[i])
 
 """Criss de gros boute de code qui revient a faire ce qui est juste au dessus... (vive les dessins)
         
@@ -200,7 +200,7 @@ class DrWho:
         self.y = y; #Position en y sur la surface de jeu
         self.nb_zapper = 0 #Nombre de zapper dont a droit Dr Who
 
-    def is_he_dead(self, jeu):
+    def is_dead(self, jeu):
         for i in range(1,len(jeu.liste_objets-1)):
             if(self.x == jeu.liste_objets[i].x and self.y == jeu.liste_objets[i].y):
                 return True #veux dire qu_il est mort
@@ -303,44 +303,33 @@ class Dalek:
         self.valeurPoint = valeurPoint
         #possibilite d'ajouter des attributs de "super dalek"
 
-        #Fonction qui gere le deplacement des daleks
-    def deplacer(jeu):
+    #Fonction qui gere le deplacement des daleks
+    def deplacer(self, jeu):
 
         #Variables pour la variation de x et y
-
         v_x = 0
         v_y = 0
         
         #Variation des x
-
         #Si la position x du Docteur est plus grande
-        if(jeu.liste_objets[0].x > super.x):
+        if(jeu.liste_objets[0].x > self.x):
             v_x = 1
 
         #Si la position x du Docteur est plus petite
-        elif(jeu.liste_objets[0].x < super.x):
+        elif(jeu.liste_objets[0].x < self.x):
             v_x = -1
 
-        #Si la position x du Docteur est egale
-        else:
-            v_x = 0
-
         #Variation des y
-
         #Si la position y du Docteur est plus grande
-        if(jeu.liste_objets[0].y > super.y):
+        if(jeu.liste_objets[0].y > self.y):
             v_y = 1
 
         #Si la position y du Docteur est plus petite
-        elif(jeu.liste_objets[0].y < super.y):
+        elif(jeu.liste_objets[0].y < self.y):
             v_y = -1
 
-        #Si la position y du Docteur est egale
-        else:
-            v_y = 0
-
-        jeu.liste_objets[i].x += v_x
-        jeu.liste_objets[i].y += v_y
+        self.x += v_x
+        self.y += v_y
 
 
 class Ferraille:
@@ -391,7 +380,6 @@ class _GetchWindows:
     
 
 class Controleur:
-    
 
     def __init__(self):
         self.jeu = Jeu()
@@ -412,13 +400,13 @@ class Controleur:
 
     def gameLOOP(self):
 
-        #
+        #Cree la liste
         self.jeu.creerListe()
 
         #Preparation de la vague, increment les dalek, zappeur, et autre goodies. Cree une liste d'objet contenant les dalek et le docteur
         self.jeu.setNextVague()
         
-        while self.jeu.denombreDalek() != 0 or self.jeu.liste[0].is_he_dead():#Verifie si il ne reste plus de daleks ou #Verifie si le joueur a ete capturer
+        while self.jeu.denombreDalek() != 0 or not self.jeu.liste[0].is_dead():#Verifie si il ne reste plus de daleks ou #Verifie si le joueur a ete capturer
 
             #Affichage de la surface de jeu 
             self.vue.afficher(self.jeu)
