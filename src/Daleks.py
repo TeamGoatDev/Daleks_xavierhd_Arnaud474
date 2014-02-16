@@ -58,10 +58,13 @@ class Jeu:
     def setNextVague(self):
         self.nb_total_dalek += 40
         self.creerListe()                               #Creation de la liste pour la nouvelle vague
-        self.denombreObjet()
-        self.denombreDalek()
         self.vague += 1
         self.liste_objets[0].nb_zapper += 1
+        self.update()
+        
+
+    def update(self):
+        self.denombreDalek() 
         self.nb_total_objets = len(self.liste_objets)   #Calcule le nombre d'objet dans la liste
 
     def deplacerDalek(self,jeu):
@@ -74,9 +77,6 @@ class Jeu:
         for i in range(1, self.nb_total_objets): #regarde tout les objets de la liste
                 if(isinstance(self.liste_objets[i], Dalek)): #recherche d_objet Dalek
                     self.nb_dalek_restant +=1
-
-    def denombreObjet(self):
-        self.nb_total_objets = len(self.liste_objets)
 
 
     #Fonction qui initialise la list contenant les objets(Personnages) pour le jeu (largeur de la surface, hauteur de la surface, nombre de daleks au total, liste qui contient les objets)
@@ -149,17 +149,21 @@ class Jeu:
         return liste_a_POPER
 
     def suppressionDalek(self, liste_a_POPER, creeFerraille = True):
-        stabilisateur = 0 #sers a equilibrer les numero de liste afin que lorqu_il y a un element de supprimer, les numeros des autre element ne sois pas chambouler vu qu_il sont statique
+
         if(liste_a_POPER): #une liste vide est fausse
-            for i in range(1, len(liste_a_POPER)):
+            for i in range(len(liste_a_POPER)-1, 0, -1):
+                
                 if(creeFerraille): #Verifie s_il doit y avoir creation de ferraille
-                    for k in range(1, self.nb_total_objets):
-                        #Verifie qu_il n_y ai pas deja une ferraille a cette emplacement
-                        if(not(self.liste_objets[liste_a_POPER[i]].x == self.liste_objets[k].x and self.liste_objets[liste_a_POPER[i]].y == self.liste_objets[k].y)):
-                            #ajout des ferrailles
+                    dejaFerraille = False
+                    #Verifie qu_il n_y a pas de ferraille a cette position
+                    for k in range(1, self.nb_total_objets-1):
+                        if(isinstance(self.liste_objets[k], Ferraille)):
+                            if(self.liste_objets[liste_a_POPER[i]].x == self.liste_objets[k].x and self.liste_objets[liste_a_POPER[i]].y == self.liste_objets[k].y):
+                                dejaFerraille = True
+                    else:
+                        if(dejaFerraille == False):
                             self.liste_objets.append( Ferraille(self.liste_objets[liste_a_POPER[i]].x, self.liste_objets[liste_a_POPER[i]].y) )
-                self.liste_objets.pop(liste_a_POPER[i]-stabilisateur) #suppression des elements
-                stabilisateur +=1
+                self.liste_objets.pop(liste_a_POPER[i]) #suppression des elements
 
 #Classe pour les objets qui seront dans la surface de jeu 
 class DrWho:
@@ -386,7 +390,7 @@ class Controleur:
     def __init__(self):
         self.jeu = Jeu()
         self.vue = Vue()
-        #os.system('mode con:cols=22 lines=33')
+        #os.system('mode con:cols=23 lines=33')
         os.system('mode con:cols=120 lines=33')
 
     def main(self):
@@ -411,8 +415,8 @@ class Controleur:
         while drWhoIsNotDead:
             #Verifie si il ne reste plus de daleks ou verifie si le joueur a ete capturer
             while drWhoIsNotDead or self.jeu.nb_dalek_restant != 0:
-                self.runLevel()
-                self.jeu.denombreDalek()
+                self.runLevel()     #lance les niveau un a la suite de l'autre
+                self.jeu.update()   #Update des variables du jeux
                 drWhoIsNotDead = self.jeu.liste_objets[0].notDead(self.jeu)
             if drWhoIsNotDead:
                 #Preparation de la prochaine vague, incremente les dalek, zappeur, et autre goodies.
@@ -440,6 +444,9 @@ class Controleur:
             elif(retour == b'z'):#zappeur
                 self.jeu.suppressionDalek(  self.jeu.liste_objets[0].zapper(self.jeu)  , False)#suppressionDalek supprime les elements qui sont retourner par la fonction qu_elle a en parametre (le zap de drwho) 
                 self.vue.zapAnimation(self.jeu) #Affichage du zap sur l'espace de jeu
+
+        #Update des variables du jeux
+        self.jeu.update()
 
         #Affichage de la surface de jeu 
         self.vue.afficher(self.jeu)
