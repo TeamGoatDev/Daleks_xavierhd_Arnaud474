@@ -56,7 +56,7 @@ class Jeu:
         self.surface_h = 30             #Hauteur de la surface de jeu
 
     def setNextVague(self):
-        self.nb_total_dalek += 1
+        self.nb_total_dalek += 40
         self.creerListe()                               #Creation de la liste pour la nouvelle vague
         self.denombreObjet()
         self.denombreDalek()
@@ -157,7 +157,7 @@ class Jeu:
                         #Verifie qu_il n_y ai pas deja une ferraille a cette emplacement
                         if(not(self.liste_objets[liste_a_POPER[i]].x == self.liste_objets[k].x and self.liste_objets[liste_a_POPER[i]].y == self.liste_objets[k].y)):
                             #ajout des ferrailles
-                            self.jeu.liste_objets.append( Ferraille(self.liste_objets[liste_a_POPER[i]].x, self.liste_objets[liste_a_POPER[i]].y) )
+                            self.liste_objets.append( Ferraille(self.liste_objets[liste_a_POPER[i]].x, self.liste_objets[liste_a_POPER[i]].y) )
                 self.liste_objets.pop(liste_a_POPER[i]-stabilisateur) #suppression des elements
                 stabilisateur +=1
 
@@ -165,7 +165,7 @@ class Jeu:
 class DrWho:
     def __init__(self, x, y):
         self.x = x  #Position en x sur la surface de jeu 
-        self.y = y #Position en y sur la surface de jeu
+        self.y = y  #Position en y sur la surface de jeu
         self.nb_zapper = 0 #Nombre de zapper dont a droit Dr Who
 
     def notDead(self, jeu):
@@ -178,21 +178,20 @@ class DrWho:
         liste_a_POPER = []      #liste de tous les objets a retirer de la liste
 
         for i in range(1, jeu.nb_total_objets):
-            while aPoper:
-                if( (self.x-1 == jeu.liste_objets[i].x and self.y-1 == jeu.liste_objets[i].y) or (self.x-1 == jeu.liste_objets[i].x and self.y == jeu.liste_objets[i].y) or (self.x-1 == jeu.liste_objets[i].x and self.y+1 == jeu.liste_objets[i].y) or (self.x == jeu.liste_objets[i].x and self.y-1 == jeu.liste_objets[i].y) or (self.x == jeu.liste_objets[i].x and self.y-1 == jeu.liste_objets[i].y) or (self.x+1 == jeu.liste_objets[i].x and self.y-1 == jeu.liste_objets[i].y) or (self.x+1 == jeu.liste_objets[i].x and self.y == jeu.liste_objets[i].y) or (self.x+1 == jeu.liste_objets[i].x and self.y+1 == jeu.liste_objets[i].y)):
-                    liste_a_POPER.append(i)
+            if( (self.x-1 == jeu.liste_objets[i].x and self.y-1 == jeu.liste_objets[i].y) or (self.x-1 == jeu.liste_objets[i].x and self.y == jeu.liste_objets[i].y) or (self.x-1 == jeu.liste_objets[i].x and self.y+1 == jeu.liste_objets[i].y) or (self.x == jeu.liste_objets[i].x and self.y-1 == jeu.liste_objets[i].y) or (self.x == jeu.liste_objets[i].x and self.y-1 == jeu.liste_objets[i].y) or (self.x+1 == jeu.liste_objets[i].x and self.y-1 == jeu.liste_objets[i].y) or (self.x+1 == jeu.liste_objets[i].x and self.y == jeu.liste_objets[i].y) or (self.x+1 == jeu.liste_objets[i].x and self.y+1 == jeu.liste_objets[i].y)):
+                liste_a_POPER.append(i)
 
         return liste_a_POPER
 
 
     def teleportation(self, jeu):
 
-        position_ko = True
+        mauvaisePosition = True
         compteur = 0 # cherche un certain nombre de fois une bonne case puis s_il ne trouve pas, redonne le choix a l'usager quoi faire
         #Tant que la position n'est pas une position valide par rapport a la postion des Daleks
-        while position_ko == True:
+        while mauvaisePosition:
 
-            position_ko = False
+            mauvaisePosition = True
 
             x = random.randint(1, jeu.surface_l)
             y = random.randint(1, jeu.surface_h)
@@ -202,7 +201,7 @@ class DrWho:
             for i in range(1, jeu.nb_total_objets):
                 #Si la case est a au moins deux cases du Dalek
                 if ( (x >= jeu.liste_objets[i].x+2 or x <= jeu.liste_objets[0].x-2) or (y >= jeu.liste_objets[0].y+2 or y <= jeu.liste_objets[0].y-2) ):
-                        position_ko = True
+                        mauvaisePosition = False
 
             if(compteur == 15):
                 break
@@ -414,7 +413,7 @@ class Controleur:
             while drWhoIsNotDead or self.jeu.nb_dalek_restant != 0:
                 self.runLevel()
                 self.jeu.denombreDalek()
-                self.jeu.liste_objets[0].notDead(self.jeu)
+                drWhoIsNotDead = self.jeu.liste_objets[0].notDead(self.jeu)
             if drWhoIsNotDead:
                 #Preparation de la prochaine vague, incremente les dalek, zappeur, et autre goodies.
                 #et cree une liste d'objet contenant les dalek et le docteur
@@ -436,10 +435,10 @@ class Controleur:
             retour = self.jeu.liste_objets[0].deplacer(self.jeu) #retourne la touche appuyer par le joueur
         
             if(retour == b'x'):#teleportation
-                aFontionner = self.jeu.liste_objets[0].teleportation()
+                aFontionner = self.jeu.liste_objets[0].teleportation(self.jeu)
 
             elif(retour == b'z'):#zappeur
-                self.jeu.suppressionDalek(  self.jeu.liste_objets[0].zapper()  , False)#suppressionDalek supprime les elements qui sont retourner par la fonction qu_elle a en parametre (le zap de drwho) 
+                self.jeu.suppressionDalek(  self.jeu.liste_objets[0].zapper(self.jeu)  , False)#suppressionDalek supprime les elements qui sont retourner par la fonction qu_elle a en parametre (le zap de drwho) 
                 self.vue.zapAnimation(self.jeu) #Affichage du zap sur l'espace de jeu
 
         #Affichage de la surface de jeu 
