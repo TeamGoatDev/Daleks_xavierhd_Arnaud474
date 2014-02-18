@@ -9,39 +9,34 @@ class Vue:
 
     #Fonction qui fait l'affichage de jeu dans la console
     def afficher(self, jeu):
-    
+
         #Nettoye l'ecran avant d'afficher le jeu de nouveau
         os.system('cls')
 
         #Affichage du terrain 
         for y in range(0,jeu.surface_h+1):
             for x in range(0, jeu.surface_l+1):
-
-                case_vide = True
-                
-                #Regarde dans la liste si il y a un element a cette position
-                for n in range(0, jeu.nb_total_objets):
-                    
-                    #Si la case courante correspond a la case de la liste
+                #Si la case courante correspond a un element de la liste
+                for n in range(0, jeu.nb_total_objets-1):
                     if(x == jeu.liste_objets[n].x and y == jeu.liste_objets[n].y):
-                        #Si c'est le docteur who
-                        if(n==0):
-                            print(chr(1),end='')
-                        #Si c'est un Dalek
-                        elif(isinstance(jeu.liste_objets[n], Dalek)):
-                            print(chr(177),end='')
-                        #Si c'est un tas de ferraille
-                        elif(isinstance(jeu.liste_objets[n], Ferraille)):
-                            print('#',end='')
-                        
-                        case_vide = False
-                   
-                if(case_vide == True):
+                        print(jeu.liste_objets[n].apparence, end='')
+                        break
+                else:
                     print('-',end='')
+
             if(y == 0):
-                print('Points: '+str(jeu.points),end='') #Affiche les points    
+                print('Points: '+str(jeu.points),end='') #Affiche les points
+            elif(y == 1):
+                print('Zappeur: '+str(jeu.liste_objets[0].nb_zapper),end='') #Affiche les points
             print('')   #end line
         print('')   #end line
+
+    def splashNiveau(self, jeu):
+        os.system('cls')
+        print('')
+        print('Vague : '+str(jeu.vague))
+        print('Points : '+str(jeu.points))
+        time.sleep(2)
 
 
 class Jeu:
@@ -138,36 +133,35 @@ class Jeu:
 
     #Fonction gerant les collisions des daleks entre eux et les ferrailles
     def collision(self):
-
+ 
+        #Boucle pour regader les differents objets de la liste
+        for i in range(self.nb_total_objets-1,0,-1):
+            
+            self.nb_total_objets = len((self.liste_objets))
+            
+            #Regarde si la piece est un Dalek
+            if(isinstance(self.liste_objets[i], Dalek)):
+                #Boucle pour faire la comparaison entre les deux pieces
+                for j in range(self.nb_total_objets-1,0,-1):
                     
-            #Boucle pour regader les differents objets de la liste
-            for i in range(self.nb_total_objets-1,0,-1):
-                
-                self.nb_total_objets = len((self.liste_objets))
-                
-                #Regarde si la piece est un Dalek
-                if(isinstance(self.liste_objets[i], Dalek)):
-                    #Boucle pour faire la comparaison entre les deux pieces
-                    for j in range(self.nb_total_objets-1,0,-1):
-                        
-                        
-                        #Si les positions de j et i sont identiques
-                        if(self.liste_objets[i].x == self.liste_objets[j].x and self.liste_objets[i].y == self.liste_objets[j].y and i != j):
-               
-                            #Si l'objet de comparaison est un Dalek
-                            if(isinstance(self.liste_objets[j], Dalek)):
-                                self.liste_objets.append(Ferraille(self.liste_objets[i].x, self.liste_objets[i].y))
-                                self.points += self.liste_objets[i].valeurPoint
-                                self.liste_objets.pop(i)
-                                self.points += self.liste_objets[j].valeurPoint
-                                self.liste_objets.pop(j)
-                                break
-                                
-                            #Si l'objet de comparaison est une Ferraille
-                            elif(isinstance(self.liste_objets[j], Ferraille)):
-                                self.points += self.liste_objets[i].valeurPoint
-                                self.liste_objets.pop(i)
-                                break
+                    
+                    #Si les positions de j et i sont identiques
+                    if(self.liste_objets[i].x == self.liste_objets[j].x and self.liste_objets[i].y == self.liste_objets[j].y and i != j):
+           
+                        #Si l'objet de comparaison est un Dalek
+                        if(isinstance(self.liste_objets[j], Dalek)):
+                            self.liste_objets.append(Ferraille(self.liste_objets[i].x, self.liste_objets[i].y))
+                            self.points += self.liste_objets[i].valeurPoint
+                            self.liste_objets.pop(i)
+                            self.points += self.liste_objets[j].valeurPoint
+                            self.liste_objets.pop(j)
+                            break
+                            
+                        #Si l'objet de comparaison est une Ferraille
+                        elif(isinstance(self.liste_objets[j], Ferraille)):
+                            self.points += self.liste_objets[i].valeurPoint
+                            self.liste_objets.pop(i)
+                            break
                                          
                                   
 #Classe pour les objets qui seront dans la surface de jeu 
@@ -176,6 +170,7 @@ class DrWho:
         self.x = x  #Position en x sur la surface de jeu 
         self.y = y #Position en y sur la surface de jeu
         self.nb_zapper = 0 #Nombre de zapper dont a droit Dr Who
+        self.apparence = chr(1) #Caractere d_affichage
 
     def notDead(self, jeu):
         for i in range(1,jeu.nb_total_objets):
@@ -316,6 +311,7 @@ class Dalek:
         self.x = x  #Position en x sur la surface de jeu 
         self.y = y; #Position en y sur la surface de jeu
         self.valeurPoint = valeurPoint
+        self.apparence = chr(177) #Caractere d_affichage
         #possibilite d'ajouter des attributs de "super dalek"
 
     #Fonction qui gere le deplacement des daleks
@@ -351,7 +347,7 @@ class Ferraille:
     def __init__(self, x, y):
         self.x = x  #Position en x sur la surface de jeu 
         self.y = y; #Position en y sur la surface de jeu
-
+        self.apparence = '#' #Caractere d_affichage
 
 
 #Tout le code suivant a ete pris sur internet a cette addresse : http://code.activestate.com/recipes/134892/
@@ -399,7 +395,7 @@ class Controleur:
     def __init__(self):
         self.jeu = Jeu()
         self.vue = Vue()
-        #os.system('mode con:cols=22 lines=33')
+        #os.system('mode con:cols=30 lines=40')
         os.system('mode con:cols=120 lines=60')
 
     def main(self):
@@ -419,6 +415,7 @@ class Controleur:
     def gameLOOP(self):
 
         self.jeu.setNextVague()
+        self.vue.splashNiveau(self.jeu)
         drWhoIsNotDead = True
 
         while drWhoIsNotDead:
