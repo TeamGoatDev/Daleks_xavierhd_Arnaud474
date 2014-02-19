@@ -40,8 +40,12 @@ class Vue:
                     print('-',end='')
             if(y == 0):
                 print('Points: '+str(jeu.points),end='') #Affiche les points
-            if(y == 1):
-                print('Zappeur: '+str(jeu.liste_objets[0].nb_zapper), end='')
+            elif(y == 1):
+                print('Zappeur: '+str(jeu.liste_objets[0].nb_zapper),end='') #Affiche les points
+            elif(y == 2):
+                print('Vague: '+str(jeu.vague),end='') #Affiche le numero de vague
+            elif(y == 3):
+                print(str(jeu.nb_dalek_restant)+'/'+str(jeu.nb_total_dalek),end='') #Affiche les points
                 
             print('')   #end line
         print('')   #end line
@@ -83,11 +87,80 @@ class Vue:
                         
             if(y == 0):
                 print('Points: '+str(jeu.points),end='') #Affiche les points
-            if(y == 1):
-                print('Zappeur: '+str(jeu.liste_objets[0].nb_zapper), end='')
+            elif(y == 1):
+                print('Zappeur: '+str(jeu.liste_objets[0].nb_zapper),end='') #Affiche les points
+            elif(y == 2):
+                print('Vague: '+str(jeu.vague),end='') #Affiche le numero de vague
+            elif(y == 3):
+                print(str(jeu.nb_dalek_restant)+'/'+str(jeu.nb_total_dalek),end='') #Affiche les points
                 
             print('')   #end line
         print('')   #end line
+
+    def splashNiveau(self, jeu):
+        os.system('cls')
+        print('')
+        print('Vague : '+str(jeu.vague))
+        print('Points : '+str(jeu.points))
+        time.sleep(2)
+
+    def endGame(self, jeu):
+        os.system('cls')
+        print('GAME OVER !!!')
+        print('')
+        print('Vague : '+str(jeu.vague))
+        print('Points : '+str(jeu.points))
+        msvcrt.getch()
+
+    def getUserInput(self):
+
+        return msvcrt.getch()
+
+    def splashPasZapper(self):
+        os.system('cls')
+        print('\n\n\n\nPas de zappeur disponible !!!')
+        time.sleep(1)
+
+    def endGame(self, jeu):
+        os.system('cls')
+        print('GAME OVER !!!\n\n\n')
+        print('Vague : '+str(jeu.vague))
+        print('Points : '+str(jeu.points))
+        print('\n\n\n\nVoulez-vous recommencer une partie? oui[1] ou non[2]')
+        return self.getUserInput()
+
+    def menu(self):
+        os.system('cls')
+        print('Les Daleks contre Dr. Who')
+        print('_________________________\n\n\n')
+        print('1. Jouer\n\n')
+        print('2. Instruction\n\n')
+        print('3. About\n\n')
+        print('4. Quitter')
+        return self.getUserInput()
+
+    def instruction(self):
+        os.system('cls')
+        print('Les Daleks contre Dr. Who')
+        print('_________________________\n')
+        print('Instruction\n\n\n')
+        print('Votre objectif est de detruire le plus de Daleks possible avant qu_ils ne vous capture. \n\n\nChaque Dalek detruit vous attribut 5 credit galactique.\n\n')
+        print('Utiliser les touches du clavier numerique (1 a 9) pour vous deplacer  et pieger les Daleks\n\n')
+        print('Vous disposerez d_une arme extrement puissante, le rayon laser cosmique, a utiliser avec parcimonie car ils sont \nresource rare. Pour en declancher un, appuyez sur la touche "-".\n\n')
+        print('Vous avez aussi l_habilete de vous teleporter aleatoirement n_importe quand avec la touche "*", afin de pieger les Daleks\n\n')
+        print('Bonne chance Docteur. Ce n_est qu_une question de temps avant de vous voir succomber...\n\n\n\n')
+        print('Pesez sur une touche pour retourner au menu principal')
+        self.getUserInput()
+
+    def about(self):
+        os.system('cls')
+        print('Les Daleks contre Dr. Who')
+        print('_________________________\n')
+        print('A propos\n\n\n\n')
+        print('Projet realiser par Arnaud et Xavier \n\n\nGit du projet: https://github.com/TeamGoatDev/Daleks_xavierhd_Arnaud474\n\n\n\n')
+        print('Pesez sur une touche pour retourner au menu principal')
+        self.getUserInput()
+
 
 
 class Jeu:
@@ -109,6 +182,16 @@ class Jeu:
         self.vague += 1
         self.liste_objets[0].nb_zapper += 1
         self.nb_total_objets = len(self.liste_objets)   #Calcule le nombre d'objet dans la liste
+
+    def reset(self):
+        self.points = 0                 
+        self.vague = 0                  
+        self.nb_dalek_restant = 0       
+        self.nb_total_dalek = 0         
+        self.nb_total_objets = 0        
+        self.liste_objets[:] = []         
+        self.surface_l = 20
+        self.surface_h = 30  
 
     def deplacerDalek(self,jeu):
         for i in range(1, self.nb_total_objets): #regarde tout les objets de la liste
@@ -238,6 +321,7 @@ class DrWho:
                    jeu.points += jeu.liste_objets[i].valeurPoint
                 jeu.liste_objets.pop(i)
                 jeu.nb_total_objets = len(jeu.liste_objets)
+        self.nb_zapper -= 1
                 
                    
 
@@ -269,27 +353,24 @@ class DrWho:
         else:
             self.x = x
             self.y = y
-            return True #ca a marcher
-        return False    #ca n_a pas marcher
+            return False #ca a marcher
+        return True    #ca n_a pas marcher
 
 
 
 
 
      #Fonction qui gere le deplacement du joueur
-    def deplacer(self, jeu):
+    def deplacer(self, jeu, key):
 
-        deplacement_valide = False
         var = 1
 
-        while deplacement_valide == False:
-
-            key = msvcrt.getch()
-
+        if(key == b'*' or key == b'-'):#Teleportation #Zappeur
+            return key
+        else:
             #Variables pour la variation de x et y
             v_x = 0
             v_y = 0
-            
             
             #Deplacement vers le bas a gauche
             if(key == b'1'):
@@ -336,29 +417,17 @@ class DrWho:
                 v_x = -var
                 v_y = 0 
 
-            #Teleportation
-            if(key == b'*'):
-                if(self.nb_zapper > 0):
-                    deplacement_valide = True
-                           
-            #Zappeur
-            if(key == b'-'):
-                deplacement_valide = True
-            
             #Determine si le deplacement sera a l'interieur de la zone de jeu
             if(jeu.liste_objets[0].x+v_x <= jeu.surface_l and jeu.liste_objets[0].y+v_y <= jeu.surface_h and jeu.liste_objets[0].x+v_x >= 0 and jeu.liste_objets[0].y+v_y >= 0):
-                deplacement_valide = True
-            
-            for i in range(1, jeu.nb_total_objets):
-                #Determine si il y a une piece sur l'endroit ou le joueur veut se deplacer
-                if(jeu.liste_objets[0].x+v_x == jeu.liste_objets[i].x and jeu.liste_objets[0].y+v_y == jeu.liste_objets[i].y):
-                    deplacement_valide = False
-        
-        #Change la position du Docteur Who lorsque le deplacement est valide       
-        jeu.liste_objets[0].x += v_x
-        jeu.liste_objets[0].y += v_y
-
-        return key
+                for i in range(1, jeu.nb_total_objets):
+                    #Determine si il y a une piece sur l'endroit ou le joueur veut se deplacer
+                    if(jeu.liste_objets[0].x+v_x == jeu.liste_objets[i].x and jeu.liste_objets[0].y+v_y == jeu.liste_objets[i].y):
+                        return 0
+                else:
+                    #Change la position du Docteur Who lorsque le deplacement est valide       
+                    jeu.liste_objets[0].x += v_x
+                    jeu.liste_objets[0].y += v_y
+                    return 1
 
 
 class Dalek:
@@ -453,23 +522,28 @@ class Controleur:
         os.system('mode con:cols=120 lines=60')
 
     def main(self):
-        #call du menu
-        retourMenu = 0 #fonction menu ICI
-        if (retourMenu == 0):
-            self.gameLOOP()
-        elif (retourMenu == 1):
-            pass #do something
-        elif (retourMenu == 2):
-            pass #do something
-        elif (retourMenu == 3):
-            pass #do something
 
-        return 0
+        while (True):#boucle infini tant que le retour de la fonction nest pas appele
+            retourMenu = self.vue.menu() #fonction menu ICI
+            if (retourMenu == b'1'):
+                retour = True
+                while(retour):
+                    retour = self.gameLOOP()
+            elif (retourMenu == b'2'):
+                self.vue.instruction()
+            elif (retourMenu == b'3'):
+                self.vue.about()
+            elif (retourMenu == b'4'):
+                os.system('cls')
+                return 0
+
+        
 
     def gameLOOP(self):
 
         self.jeu.setNextVague()
         drWhoIsNotDead = True
+        self.jeu.reset()
 
         while drWhoIsNotDead:
             #Verifie si il ne reste plus de daleks ou verifie si le joueur a ete capturer
@@ -485,38 +559,45 @@ class Controleur:
                     self.jeu.setNextVague()
             
         else:
-            self.endGame()
+            return self.vue.endGame(self.jeu)
 
 
     def runLevel(self):
-        #Affichage de la surface de jeu 
-        self.vue.afficher(self.jeu)
         
-        aFontionner = False #Afin de stocker le retour de la teleportation
-        while (not aFontionner):
+        recommencer = True #Afin de stocker le retour de la teleportation
+
+        while (recommencer):
+
+            #Affichage de la surface de jeu 
+            self.vue.afficher(self.jeu)
             
-            aFontionner = True
+            recommencer = False
             
             #Deplacement du joueur
-            retour = self.jeu.liste_objets[0].deplacer(self.jeu) #retourne la touche appuyer par le joueur
+            retour = self.jeu.liste_objets[0].deplacer(self.jeu, self.vue.getUserInput()) #retourne la touche special appuyer par le joueur ou change sa position si touche normal
         
             if(retour == b'*'):#teleportation
-                aFontionner = self.jeu.liste_objets[0].teleportation(self.jeu)
+                recommencer = self.jeu.liste_objets[0].teleportation(self.jeu)
 
             elif(retour == b'-'):#zappeur
                 if(self.jeu.liste_objets[0].nb_zapper > 0):
-                    self.jeu.liste_objets[0].nb_zapper -= 1
                     self.jeu.liste_objets[0].zapper(self.jeu)#suppressionDalek supprime les elements qui sont retourner par la fonction qu_elle a en parametre (le zap de drwho) 
                     self.vue.zapAnimation(self.jeu) #Affichage du zap sur l'espace de jeu
                     time.sleep(0.5)
+                else:
+                    self.vue.splashPasZapper()
+                    recommencer = True
+            elif(retour == 0):
+                recommencer = True
 
         #Affichage de la surface de jeu
         self.vue.afficher(self.jeu)
+        time.sleep(0.5)
 
-        """#Afficher les positions
+        """#Afficher les positions a des fin de debugage
         for i in range(0, self.jeu.nb_total_objets):
             print(self.jeu.liste_objets[i].x, self.jeu.liste_objets[i].y)"""
-        time.sleep(0.5)
+        
         
         #Deplacement automatique des Daleks
         self.jeu.deplacerDalek(self.jeu)
@@ -524,16 +605,6 @@ class Controleur:
         #Verifie les collisions
         self.jeu.collision()
        
-       
-        
-
-    def endGame(self):
-        os.system('cls')
-        print('GAME OVER !!!')
-        print('')
-        print('Vague : '+str(self.jeu.vague))
-        print('Points : '+str(self.jeu.points))
-        msvcrt.getch()
 
 
 if __name__ == "__main__":
