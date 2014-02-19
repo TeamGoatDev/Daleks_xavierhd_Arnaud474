@@ -105,13 +105,6 @@ class Vue:
         print('Points : '+str(jeu.points))
         time.sleep(2)
 
-    def endGame(self, jeu):
-        os.system('cls')
-        print('GAME OVER !!!')
-        print('')
-        print('Vague : '+str(jeu.vague))
-        print('Points : '+str(jeu.points))
-        msvcrt.getch()
 
     def getUserInput(self):
 
@@ -475,47 +468,6 @@ class Ferraille:
     def __init__(self, x, y):
         self.x = x  #Position en x sur la surface de jeu 
         self.y = y; #Position en y sur la surface de jeu
-
-
-
-#Tout le code suivant a ete pris sur internet a cette addresse : http://code.activestate.com/recipes/134892/
-class _Getch:
-    """Gets a single character from standard input.  Does not echo to the
-screen."""
-    def __init__(self):
-        try:
-            self.impl = _GetchWindows()
-        except ImportError:
-            self.impl = _GetchUnix()
-
-    def __call__(self): return self.impl()
-
-
-class _GetchUnix:
-    def __init__(self):
-        import tty, sys
-
-    def __call__(self):
-        import sys, tty, termios
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return ch
-
-
-class _GetchWindows:
-    def __init__(self):
-        import msvcrt
-
-    def __call__(self):
-        import msvcrt
-        return msvcrt.getch()
-
-
     
 
 class Controleur:
@@ -550,21 +502,19 @@ class Controleur:
     def gameLOOP(self):
 
         self.jeu.reset()
-        self.jeu.setNextVague()
         drWhoIsNotDead = True
 
         while drWhoIsNotDead:
+             #Preparation de la prochaine vague, incremente les dalek, zappeur, et autre goodies.
+            #et cree une liste d'objet contenant les dalek et le docteur
+            self.jeu.setNextVague()
+            self.vue.splashNiveau(self.jeu)
+
             #Verifie si il ne reste plus de daleks ou verifie si le joueur a ete capturer
             while (drWhoIsNotDead == True and self.jeu.nb_dalek_restant != 0):
                 self.runLevel()
                 self.jeu.denombreDalek()
-                drWhoIsNotDead = self.jeu.liste_objets[0].notDead(self.jeu)
-                
-                
-                if(self.jeu.nb_dalek_restant == 0):
-                    #Preparation de la prochaine vague, incremente les dalek, zappeur, et autre goodies.
-                    #et cree une liste d'objet contenant les dalek et le docteur
-                    self.jeu.setNextVague()
+                drWhoIsNotDead = self.jeu.liste_objets[0].notDead(self.jeu)       
             
         else:
             return self.vue.endGame(self.jeu)
