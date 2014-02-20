@@ -7,6 +7,29 @@ import time
 class Vue2:
     def __init__(self):
         pass
+    def afficher(self, jeu):
+        pass
+    def zapAnimation(self, jeu):
+        pass
+    def splashNiveau(self, jeu):
+        pass
+    def getUserInput(self):
+        pass
+    def splashPasZapper(self):
+        pass
+    def endGame(self, jeu):
+        pass
+    def menu(self):
+        pass
+    def instruction(self):
+        pass
+    def about(self):
+        pass
+    def questionQuitterEnPartie(self):
+        pass
+
+
+
 #Declaration des objets
 class Vue:
     def __init__(self):
@@ -120,11 +143,13 @@ class Vue:
         print('\n\n\n\nPas de zappeur disponible !!!')
         time.sleep(1)
 
-    def endGame(self, jeu):
+    def endGame(self, jeu, scoreDejaEntre = False):
         os.system('cls')
         print('GAME OVER !!!\n\n\n')
         print('Vague : '+str(jeu.vague))
         print('Points : '+str(jeu.points))
+        if(not scoreDejaEntre):
+            print('\n\nAppuyer sur 4 pour enregistrer votre score')
         print('\n\n\n\nVoulez-vous recommencer une partie? oui[1] ou non[2]')
         return self.getUserInput()
 
@@ -134,8 +159,9 @@ class Vue:
         print('_________________________\n\n\n')
         print('1. Jouer\n\n')
         print('2. Instruction\n\n')
-        print('3. About\n\n')
-        print('4. Quitter')
+        print('3. HightScores\n\n')
+        print('4. About\n\n')
+        print('5. Quitter')
         return self.getUserInput()
 
     def instruction(self):
@@ -167,6 +193,25 @@ class Vue:
         os.system('cls')
         print('\n\n\n\nQuitter?    oui[1] ou non[2]')
         return self.getUserInput()
+
+    def hightScore(self, hightScore):
+        os.system('cls')
+        print('Les Daleks contre Dr. Who')
+        print('_________________________\n')
+        print('HightScores\n\n\n')
+        if(hightScore):
+            for i in hightScore:
+                print(i + '\n\n')
+        else:
+            print('Il n_y a pas encore de hightScores...\n\nA vous de jouer!!!')
+
+        print('\n\n\n\nPesez sur une touche pour retourner au menu principal')
+        self.getUserInput()
+
+    def getUserName(self, jeu):
+        os.system('cls')
+        print('Score : '+str(jeu.points))
+        return input("Entrez votre nom : ")
 
 
 
@@ -306,8 +351,28 @@ class Jeu:
                                 self.points += self.liste_objets[i].valeurPoint
                                 self.liste_objets.pop(i)
                                 break
-                                         
-                                  
+
+    def getHightScore(self):
+        
+        try:
+            tampon = open("hight.Score", 'r+')#rb == read binary
+            hightScore = tampon.readlines()
+            tampon.close()
+            return hightScore
+        except:
+            tampon = open("hight.Score", 'w+')#w == write
+            tampon.close()
+            return 0
+
+
+
+    def setHightScore(self, name):
+        tampon = open("hight.Score", 'a')#ab == append binary
+        aEcrire = name + ' ' + str(self.points) + '\n'
+        tampon.write(aEcrire)
+        tampon.close()
+
+
 #Classe pour les objets qui seront dans la surface de jeu 
 class DrWho:
     def __init__(self, x, y):
@@ -485,13 +550,15 @@ class Ferraille:
 
 class Controleur:
 
-    def __init__(self, arg = None):
+    def __init__(self):
         self.jeu = Jeu()
-        #if(arg == '-shell'):   en commentaire car pas encore coder
-        if(arg == None):
-            self.vue = Vue()
-        #if(arg == None):       en commentaire car pas encore coder
-            #self.vue = Vue2()  en commentaire car pas encore coder
+        #try:#en commentaire car pas encore coder
+            #if(sys.argv[1] == '-shell'):
+                #self.vue = Vue()
+        self.vue = Vue()
+        #except:
+            #self.vue = Vue2()
+
         
 
     def main(self):
@@ -505,9 +572,11 @@ class Controleur:
                     retour = self.gameLOOP()
             elif (retourMenu == b'2'):
                 self.vue.instruction()
-            elif (retourMenu == b'3'):
-                self.vue.about()
+            elif(retourMenu == b'3'):
+                self.vue.hightScore(self.jeu.getHightScore())
             elif (retourMenu == b'4'):
+                self.vue.about()
+            elif (retourMenu == b'5'):
                 os.system('cls')
                 return 0
 
@@ -533,7 +602,16 @@ class Controleur:
                     if(self.vue.questionQuitterEnPartie() == b'1'):
                         return None
         else:
-            return self.vue.endGame(self.jeu)
+            if(self.jeu.points > 0):
+                retour = self.vue.endGame(self.jeu)
+                if(retour == b'4'):
+                    self.jeu.setHightScore(self.vue.getUserName(self.jeu))
+                elif(retour == b'1'):
+                    return b'1'
+                elif(retour == b'2'):
+                    return b'2'
+
+            return self.vue.endGame(self.jeu, True) #score deja entree
 
 
     def runLevel(self):
@@ -585,8 +663,6 @@ class Controleur:
 
 
 if __name__ == "__main__":
-    try:
-        c = Controleur(sys.argv[1])#argument 0 est le nom du fichier, le 1 est le parametre entrer qui le suit.
-    except:
-        c = Controleur()#Handle aussi si il n'y a pas de parametre
+    c = Controleur()#argument 0 est le nom du fichier, le 1 est le parametre entrer qui le suit.
+
     sys.exit(c.main())
