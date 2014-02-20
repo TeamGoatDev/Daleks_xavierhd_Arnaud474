@@ -4,9 +4,14 @@ import sys
 import msvcrt
 import time
 
+class Vue2:
+    def __init__(self):
+        pass
 #Declaration des objets
 class Vue:
-
+    def __init__(self):
+        os.system('mode con:cols=125 lines=60')
+    
     #Fonction qui fait l'affichage de jeu dans la console
     def afficher(self, jeu):
 
@@ -138,11 +143,14 @@ class Vue:
         print('Les Daleks contre Dr. Who')
         print('_________________________\n')
         print('Instruction\n\n\n')
+        print('Vous voici : '+chr(1))
+        print('\nVoici un Dalek : '+chr(177))
+        print('\nEt enfin, voila une ferraille : #\n\n')
         print('Votre objectif est de detruire le plus de Daleks possible avant qu_ils ne vous capture. \n\n\nChaque Dalek detruit vous attribut 5 credit galactique.\n\n')
         print('Utiliser les touches du clavier numerique (1 a 9) pour vous deplacer  et pieger les Daleks\n\n')
-        print('Vous disposerez d_une arme extrement puissante, le rayon laser cosmique, a utiliser avec parcimonie car ils sont \nresource rare. Pour en declancher un, appuyez sur la touche "-".\n\n')
-        print('Vous avez aussi l_habilete de vous teleporter aleatoirement n_importe quand avec la touche "*", afin de pieger les Daleks\n\n')
-        print('Bonne chance Docteur. Ce n_est qu_une question de temps avant de vous voir succomber...\n\n\n\n')
+        print('Vous disposerez d_une arme extrement puissante, le rayon laser cosmique, a utiliser avec parcimonie car ils sont \nresource rare. Pour en declancher un, appuyez sur la touche " - ".\n\n')
+        print('Vous avez aussi l_habilete de vous teleporter aleatoirement n_importe quand avec la touche " * ", afin de pieger les Daleks\n\n')
+        print('Bonne chance Docteur. Ce n_est qu_une question de temps avant de vous voir succomber...\nSinon, si vous ne vous en croyez plus capable en plein milieu du jeu, appuyez sur "q" pour quitter\n\n\n\n')
         print('Pesez sur une touche pour retourner au menu principal')
         self.getUserInput()
 
@@ -154,6 +162,11 @@ class Vue:
         print('Projet realiser par Arnaud et Xavier \n\n\nGit du projet: https://github.com/TeamGoatDev/Daleks_xavierhd_Arnaud474\n\n\n\n')
         print('Pesez sur une touche pour retourner au menu principal')
         self.getUserInput()
+
+    def questionQuitterEnPartie(self):
+        os.system('cls')
+        print('\n\n\n\nQuitter?    oui[1] ou non[2]')
+        return self.getUserInput()
 
 
 
@@ -361,7 +374,7 @@ class DrWho:
 
         var = 1
 
-        if(key == b'*' or key == b'-'):#Teleportation #Zappeur
+        if(key == b'*' or key == b'-' or key == b'q'):#Teleportation #Zappeur
             return key
         else:
             #Variables pour la variation de x et y
@@ -472,11 +485,14 @@ class Ferraille:
 
 class Controleur:
 
-    def __init__(self):
+    def __init__(self, arg = None):
         self.jeu = Jeu()
-        self.vue = Vue()
-        #os.system('mode con:cols=22 lines=33')
-        os.system('mode con:cols=120 lines=60')
+        #if(arg == '-shell'):   en commentaire car pas encore coder
+        if(arg == None):
+            self.vue = Vue()
+        #if(arg == None):       en commentaire car pas encore coder
+            #self.vue = Vue2()  en commentaire car pas encore coder
+        
 
     def main(self):
 
@@ -484,10 +500,8 @@ class Controleur:
             retourMenu = self.vue.menu() #fonction menu ICI
             
             if (retourMenu == b'1'):
-                print('WTF')
-                retour = True
-                while(retour == True):
-                    print('WTF')
+                retour = b'1'
+                while(retour == b'1'):
                     retour = self.gameLOOP()
             elif (retourMenu == b'2'):
                 self.vue.instruction()
@@ -512,17 +526,19 @@ class Controleur:
 
             #Verifie si il ne reste plus de daleks ou verifie si le joueur a ete capturer
             while (drWhoIsNotDead == True and self.jeu.nb_dalek_restant != 0):
-                self.runLevel()
+                continuer = self.runLevel()
                 self.jeu.denombreDalek()
                 drWhoIsNotDead = self.jeu.liste_objets[0].notDead(self.jeu)       
-            
+                if(not continuer):
+                    if(self.vue.questionQuitterEnPartie() == b'1'):
+                        return None
         else:
             return self.vue.endGame(self.jeu)
 
 
     def runLevel(self):
         
-        recommencer = True #Afin de stocker le retour de la teleportation
+        recommencer = True #Afin de savoir si le controleur doit redonner le tour au joueur pour un faux mouvement
 
         while (recommencer):
 
@@ -547,6 +563,8 @@ class Controleur:
                     recommencer = True
             elif(retour == 0):
                 recommencer = True
+            elif(retour == b'q'):   #pour quitter en pleine partie
+                return False
 
         #Affichage de la surface de jeu
         self.vue.afficher(self.jeu)
@@ -562,9 +580,13 @@ class Controleur:
 
         #Verifie les collisions
         self.jeu.collision()
-       
+        
+        return True #Tout est aller comme il faut
 
 
 if __name__ == "__main__":
-    c = Controleur()
+    try:
+        c = Controleur(sys.argv[1])#argument 0 est le nom du fichier, le 1 est le parametre entrer qui le suit.
+    except:
+        c = Controleur()#Handle aussi si il n'y a pas de parametre
     sys.exit(c.main())
