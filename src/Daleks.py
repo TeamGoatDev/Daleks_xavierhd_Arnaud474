@@ -368,7 +368,7 @@ class Jeu:
 
     def setHightScore(self, name):
         tampon = open("hight.Score", 'a')#ab == append binary
-        aEcrire = name + ' ' + str(self.points) + '\n'
+        aEcrire = name + ';' + str(self.points) + '\n'
         tampon.write(aEcrire)
         tampon.close()
 
