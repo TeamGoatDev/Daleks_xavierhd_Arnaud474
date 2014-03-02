@@ -8,11 +8,28 @@ import time
 class Vue2:
     def __init__(self,parent):
         self.parent = parent
+
+        #Parametres de la fenetre
         self.root = Tk()
-        self.root.geometry("1024x768")
-        self.imageBackground = PhotoImage(file="drwho.gif")
+        self.root.resizable(0,0)
+        self.root.title("Dalek Vs. Dr Who")
+        self.root.geometry("1600x1000")
+
+        #Update la grosseur du frame pour qu'on puisse utiliser winfo
+        self.root.update()
+
+        #Background pour le menu
+        self.imageBackground = PhotoImage(file="bg.gif")
         self.labelBackground = Label(self.root,image=self.imageBackground)
+
+        #Surface de jeu
+        self.imageSurface = PhotoImage(file="space.gif")
+        self.imageDalek = PhotoImage(file="dalek.gif")
+        self.imageDrWho = PhotoImage(file="drwho.gif")
+        self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
         
+        #Variable pour que les boutons soient tous de la meme grosseur
+        self.buttonWidth= 400
         
         self.boutonJouer = Button(self.root, text='Jouer',width=50, bg='black', fg='white',activebackground='black', activeforeground='white',command=self.parent.gameLOOP)
         self.boutonInstructions = Button(self.root, text='Instructions',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.instruction)
@@ -21,10 +38,50 @@ class Vue2:
         self.boutonQuitter = Button(self.root, text='Quitter',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.root.destroy)
         self.boutonRetourMenu = Button(self.root, anchor=S, text='Retour au menu', width=100, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.menu)
         
-        self.textBox = Text(width=100, bg='black', fg='white')
+        self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 28))
         
     def afficher(self, jeu):
-        pass
+        
+        #Effacage initial du frame pour pouvoir 
+        self.effacerFrame()
+        
+        #Creation de l'image pour la surface de jeu et ajout du canevas
+        self.surfaceJeu.create_image(0,0, anchor=NW, image=self.imageSurface)
+
+        #Test pour la premiere position ainsi que le fonctionnement d'une image dans un canevas
+        #self.surfaceJeu.create_image(self.trouverDepartX(), 100, anchor=NW, image=self.imageDalek)
+
+        self.surfaceJeu.place(x=0, y=0)
+
+        for y in range(0, self.parent.jeu.surface_h):
+            for x in range(0, self.parent.jeu.surface_l):
+
+                case_vide = True
+                
+                #Regarde dans la liste si il y a un element a cette position
+                for n in range(0, self.parent.jeu.nb_total_objets):
+                    
+                    #Si la case courante correspond a la case de la liste
+                    if(x == self.parent.jeu.liste_objets[n].x and y == self.parent.jeu.liste_objets[n].y):
+                        
+                        #Si c'est le docteur who
+                        if(isinstance(self.parent.jeu.liste_objets[n], DrWho)):
+                            print(self.parent.jeu.liste_objets[n].x, self.parent.jeu.liste_objets[n].y)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageDrWho)
+                            
+                        #Si c'est un Dalek
+                        elif(isinstance(self.parent.jeu.liste_objets[n], Dalek)):
+                            print(self.parent.jeu.liste_objets[n].x, self.parent.jeu.liste_objets[n].y)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageDalek)
+                            
+                        #Si c'est un tas de ferraille
+                        elif(isinstance(self.parent.jeu.liste_objets[n], Ferraille)):
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageDrWho)
+                            
+                   
+                        
+        
+        
         
     def zapAnimation(self, jeu):
         pass
@@ -36,18 +93,20 @@ class Vue2:
         pass
     def endGame(self, jeu):
         pass
-    def menu(self):
+    def menu(self):      
         self.effacerFrame()
         self.labelBackground.place(x=0, y=0)
-        self.boutonJouer.place(x=350, y=400)
-        self.boutonInstructions.place(x=350, y=450)
-        self.boutonHighscore.place(x=350, y=500)
-        self.boutonAbout.place(x=350, y=550)
-        self.boutonQuitter.place(x=350, y=600)
+        self.boutonJouer.place(width=self.buttonWidth, x=600, y=400)
+        self.boutonInstructions.place(width=self.buttonWidth, x=600, y=500)
+        self.boutonHighscore.place(width=self.buttonWidth, x=600, y=600)
+        self.boutonAbout.place(width=self.buttonWidth, x=600, y=700)
+        self.boutonQuitter.place(width=self.buttonWidth, x=600, y=800)
         
     def instruction(self):
         self.effacerFrame()
-        self.textBox.pack()
+        self.labelBackground.place(x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=600, y=950)
+        self.textBox.place(height=900, x=0, y=0)
         self.textBox.insert(INSERT,"Les Daleks contre Dr. Who\n")
         self.textBox.insert(INSERT, "_________________________\n")
         self.textBox.insert(INSERT, 'Instruction\n\n\n')
@@ -56,12 +115,12 @@ class Vue2:
         self.textBox.insert(INSERT,'Vous disposerez d_une arme extrement puissante, le rayon laser cosmique, a utiliser avec parcimonie car ils sont \nresource rare. Pour en declancher un, appuyez sur la touche " - ".\n\n')
         self.textBox.insert(INSERT,'Vous avez aussi l_habilete de vous teleporter aleatoirement n_importe quand avec la touche " * ", afin de pieger les Daleks\n\n')
         self.textBox.insert(INSERT,'Bonne chance Docteur. Ce n_est qu_une question de temps avant de vous voir succomber...\nSinon, si vous ne vous en croyez plus capable en plein milieu du jeu, appuyez sur "q" pour quitter\n\n\n\n')
-        self.textBox.insert(INSERT,'Pesez sur une touche pour retourner au menu principal')
-        self.boutonRetourMenu.pack()
 
     def highScore(self):
         self.effacerFrame()
-        self.textBox.pack()
+        self.labelBackground.place(x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=600, y=950)
+        self.textBox.place(height=900, x=0, y=0)
         self.textBox.insert(INSERT,'Les Daleks contre Dr. Who\n')
         self.textBox.insert(INSERT,'_________________________\n\n')
         self.textBox.insert(INSERT,'HighScores\n\n\n')
@@ -70,17 +129,18 @@ class Vue2:
                self.textBox.insert(INSERT, i + '\n\n')
         else:
             self.textBox.insert(INSERT,'Il n_y a pas encore de hightScores...\n\nA vous de jouer!!!')"""
-        self.boutonRetourMenu.pack()
        
     def about(self):
         self.effacerFrame()
-        self.textBox.pack()
+        self.labelBackground.place(x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=600, y=950)
+        self.textBox.place(height=900, x=0, y=0)
         self.textBox.insert(INSERT,'Les Daleks contre Dr. Who\n')
         self.textBox.insert(INSERT,'_________________________\n')
         self.textBox.insert(INSERT,'A propos\n\n\n\n')
         self.textBox.insert(INSERT,'Projet realiser par Arnaud et Xavier \n\n\nGit du projet: https://github.com/TeamGoatDev/Daleks_xavierhd_Arnaud474\n\n\n\n')
         self.textBox.insert(INSERT,'Pesez sur une touche pour retourner au menu principal')
-        self.boutonRetourMenu.pack()
+        
         
     def questionQuitterEnPartie(self):
         pass
@@ -93,6 +153,11 @@ class Vue2:
         for i in listeWidgets:
             i.pack_forget()
             i.place_forget()
+
+    #Cette fonction permet de calculer la position initiale en x
+    def trouverDepartX(self):
+        return ((self.root.winfo_width()-(self.parent.jeu.surface_l*40))/2)
+    
     
 
 
@@ -320,8 +385,8 @@ class Jeu:
         self.nb_total_dalek = 0         #Nombre total de Dalek pour la vague courrante
         self.nb_total_objets = 0        #Nombre d'elements dans la liste
         self.liste_objets = []          #Liste qui contiendra les daleks et le docteur
-        self.surface_l = 20             #Largeur de la surface de jeu
-        self.surface_h = 30             #Hauteur de la surface de jeu
+        self.surface_l = 30             #Largeur de la surface de jeu
+        self.surface_h = 20             #Hauteur de la surface de jeu
 
     def setNextVague(self):
         self.nb_total_dalek += 5
@@ -341,8 +406,8 @@ class Jeu:
         self.nb_total_dalek = 0         
         self.nb_total_objets = 0        
         self.liste_objets[:] = []         
-        self.surface_l = 20
-        self.surface_h = 30  
+        self.surface_l = 30
+        self.surface_h = 20  
 
     def deplacerDalek(self,jeu):
         for i in range(1, self.nb_total_objets): #regarde tout les objets de la liste
@@ -586,7 +651,9 @@ class DrWho:
             #Deplacement vers la gauche
             if(key == b'4'):
                 v_x = -var
-                v_y = 0 
+                v_y = 0
+
+            print("Mouvement")
 
             #Determine si le deplacement sera a l'interieur de la zone de jeu
             if(jeu.liste_objets[0].x+v_x < jeu.surface_l and jeu.liste_objets[0].y+v_y < jeu.surface_h and jeu.liste_objets[0].x+v_x >= 0 and jeu.liste_objets[0].y+v_y >= 0):
@@ -655,8 +722,9 @@ class Controleur:
         
         except:
             self.vue = Vue2(self)
-            
+  
         self.vue.menu()
+        self.vue.root.mainloop()  
 
         
 
@@ -693,14 +761,14 @@ class Controleur:
 
         while (recommencer):
 
-            #Affichage de la surface de jeu 
+            #Affichage de la surface de jeu
             self.vue.afficher(self.jeu)
             
             recommencer = False
             
             #Deplacement du joueur
             retour = self.jeu.liste_objets[0].deplacer(self.jeu, self.vue.getUserInput()) #retourne la touche special appuyer par le joueur ou change sa position si touche normal
-        
+            
             if(retour == b'*'):#teleportation
                 recommencer = self.jeu.liste_objets[0].teleportation(self.jeu)
 
