@@ -19,19 +19,20 @@ class Vue2:
         self.root.update()
 
         #Background pour le menu
-        self.imageBackground = PhotoImage(file="bg.gif")
+        self.imageBackground = PhotoImage(file="bg.gif")    
         self.labelBackground = Label(self.root,image=self.imageBackground)
 
         #Surface de jeu
         self.imageSurface = PhotoImage(file="space.gif")
         self.imageDalek = PhotoImage(file="dalek.gif")
         self.imageDrWho = PhotoImage(file="drwho.gif")
+        self.imageFerraille = PhotoImage(file="ferraille.gif")
         self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
-        
+        self.surfaceJeu.bind('<Button-1>', self.deplacement)
         #Variable pour que les boutons soient tous de la meme grosseur
         self.buttonWidth= 400
         
-        self.boutonJouer = Button(self.root, text='Jouer',width=50, bg='black', fg='white',activebackground='black', activeforeground='white',command=self.parent.gameLOOP)
+        self.boutonJouer = Button(self.root, text='Jouer',width=50, bg='black', fg='white',activebackground='black', activeforeground='white',command=self.parent.newGame)
         self.boutonInstructions = Button(self.root, text='Instructions',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.instruction)
         self.boutonHighscore = Button(self.root, text='Highscore',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.highScore)
         self.boutonAbout = Button(self.root, text='About',width=50, bg='black', fg='white',activebackground='black', activeforeground='white',command=self.about)
@@ -39,6 +40,28 @@ class Vue2:
         self.boutonRetourMenu = Button(self.root, anchor=S, text='Retour au menu', width=100, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.menu)
         
         self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 28))
+
+    def deplacement(self, event):
+        print(event.x, event.y)
+
+        vX = 0
+        vY = 0
+        
+        #Gestion du click de souris
+        if(event.x > (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*40)+40)):
+            vX = 1
+
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*40))):
+            vX = -1
+            
+        if(event.y > (100 + self.parent.jeu.liste_objets[0].y*40)+40):
+            vY = 1
+
+        elif(event.y < (100 + self.parent.jeu.liste_objets[0].y*40)):
+            vY = -1
+        
+        self.parent.turn(vX, vY)
+        
         
     def afficher(self, jeu):
         
@@ -76,7 +99,7 @@ class Vue2:
                             
                         #Si c'est un tas de ferraille
                         elif(isinstance(self.parent.jeu.liste_objets[n], Ferraille)):
-                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageDrWho)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageFerraille)
                             
                    
                         
@@ -91,8 +114,12 @@ class Vue2:
         pass
     def splashPasZapper(self):
         pass
-    def endGame(self, jeu):
-        pass
+    def endGame(self):
+        self.effacerFrame()
+        self.labelBackground.place(x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=600, y=950)
+        self.textBox.place(height=900, x=0, y=0)
+        
     def menu(self):      
         self.effacerFrame()
         self.labelBackground.place(x=0, y=0)
@@ -153,6 +180,8 @@ class Vue2:
         for i in listeWidgets:
             i.pack_forget()
             i.place_forget()
+
+        
 
     #Cette fonction permet de calculer la position initiale en x
     def trouverDepartX(self):
@@ -726,6 +755,37 @@ class Controleur:
         self.vue.menu()
         self.vue.root.mainloop()  
 
+    def newGame(self):
+        self.jeu.reset()
+        self.jeu.setNextVague()
+        self.vue.afficher(self.jeu)
+
+    def turn(self, vX, vY):
+    
+        #Effectuer le deplacement du joueur
+        self.jeu.liste_objets[0].x += vX
+        self.jeu.liste_objets[0].y += vY
+        
+        #Effectuer le deplacement des Daleks
+        self.jeu.deplacerDalek(self.jeu)
+
+        #Fonction qui gere les collisions entre les Daleks
+        self.jeu.collision()
+
+        #Regarde le nombre de Daleks restants
+        self.jeu.denombreDalek()
+
+        #Regarde si le docteur est mort
+        if (self.jeu.liste_objets[0].notDead(self.jeu) == False):
+            self.vue.endGame()
+            
+        #Regarde si il reste encore des Daleks
+        if(self.jeu.nb_dalek_restant == 0):
+            self.jeu.setNextVague()
+            
+        self.vue.afficher(self.jeu)   
+
+        
         
 
     def gameLOOP(self):
