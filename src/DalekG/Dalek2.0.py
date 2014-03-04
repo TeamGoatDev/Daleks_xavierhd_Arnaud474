@@ -28,7 +28,7 @@ class Vue2:
         self.imageDrWho = PhotoImage(file="drwho.gif")
         self.imageFerraille = PhotoImage(file="ferraille.gif")
         self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
-        self.surfaceJeu.bind('<Button-1>', self.deplacement)
+        self.surfaceJeu.bind('<Button-1>', self.getUserInput)
         
         #Variable pour que les boutons soient tous de la meme grosseur
         self.buttonWidth= 400
@@ -808,7 +808,7 @@ class Controleur:
         #Regarde si le deplacement est valide          
         valide = self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)
         
-        if(valide == False)
+        if(valide == False):
             return
         
         else:
