@@ -43,27 +43,56 @@ class Vue2:
         self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 18))
         self.gameOver = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 40))
 
-    def deplacement(self, event):
+    def getUserInput(self, event):
         print(event.x, event.y)
-
-        vX = 0
-        vY = 0
+        
+        keyCode = None
         
         #Gestion du click de souris
-        if(event.x > (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)):
-            vX = 1
 
-        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))):
-            vX = -1
+        #Si le click est au Sud-Ouest du Docteur
+        if(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
+            keyCode = 1
+
+        #Si le click est au Sud du Docteur
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
+             and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
+            keyCode = 2
+
+        #Si le click est au Sud-Est du Docteur   
+        elif(event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32 and event.x >(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)):
+            keyCode = 3
+
+        #Si le click est a l'Ouest du Docteur
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
+             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+            keyCode = 4
+
+        #Si le click est directement sur le Docteur
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
+             and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32) and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+            keyCode = 5
             
-        if(event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
-            vY = 1
+        #Si le click est a l'Est du Docteur
+        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
+             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+            keyCode = 6
 
-        elif(event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
-            vY = -1
+        #Si le click est au Nord-Ouest du Docteur
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            keyCode = 7
+
+        #Si le click est au Nord du Docteur
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
+             and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            keyCode = 8
+
+        #Si le click est au Nord-Est du Docteur
+        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            keyCode = 9
+            
         
-        self.parent.turn(vX, vY)
-        
+        self.parent.turn(keyCode)
         
     def afficher(self, jeu):
         
@@ -111,8 +140,7 @@ class Vue2:
         pass
     def splashNiveau(self, jeu):
         pass
-    def getUserInput(self):
-        pass
+    
     def splashPasZapper(self):
         pass
     def endGame(self):
@@ -304,7 +332,17 @@ class Vue:
 
     def getUserInput(self):
         
-        return msvcrt.getch()
+        key = msvcrt.getch()
+  
+        try:
+            return int(key)
+        except:
+            if key == b'*':
+                return 10
+            elif key == b'-':
+                return 11
+            elif key == b'q':
+                return 12
 
     def splashPasZapper(self):
         os.system('cls')
@@ -765,42 +803,34 @@ class Controleur:
         self.jeu.setNextVague()
         self.vue.afficher(self.jeu)
 
-    def turn(self, vX, vY):
+    def turn(self, keyCode):
 
-        if(self.jeu.liste_objets[0].x+vX < self.jeu.surface_l and self.jeu.liste_objets[0].y+vY < self.jeu.surface_h and self.jeu.liste_objets[0].x+vX >= 0 and self.jeu.liste_objets[0].y+vY >= 0):
-            for i in range(1, self.jeu.nb_total_objets):
-                #Determine si il y a une piece sur l'endroit ou le joueur veut se deplacer
-                if(self.jeu.liste_objets[0].x+vX == self.jeu.liste_objets[i].x and self.jeu.liste_objets[0].y+vY == self.jeu.liste_objets[i].y):
-                    return 0
-        else:
-            return 0
-            
-        #Change la position du Docteur Who lorsque le deplacement est valide       
-        self.jeu.liste_objets[0].x += vX
-        self.jeu.liste_objets[0].y += vY
-                    
-           
+        #Regarde si le deplacement est valide          
+        valide = self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)
         
-        
-        #Effectuer le deplacement des Daleks
-        self.jeu.deplacerDalek(self.jeu)
-
-        #Fonction qui gere les collisions entre les Daleks
-        self.jeu.collision()
-
-        #Regarde le nombre de Daleks restants
-        self.jeu.denombreDalek()
-
-        #Regarde si le docteur est mort
-        if (self.jeu.liste_objets[0].notDead(self.jeu) == False):
-            self.vue.endGame()
+        if(valide == False)
             return
+        
+        else:
+            #Effectuer le deplacement des Daleks
+            self.jeu.deplacerDalek(self.jeu)
+
+            #Fonction qui gere les collisions entre les Daleks
+            self.jeu.collision()
+
+            #Regarde le nombre de Daleks restants
+            self.jeu.denombreDalek()
+
+            #Regarde si le docteur est mort
+            if (self.jeu.liste_objets[0].notDead(self.jeu) == False):
+                self.vue.endGame()
+                return
             
-        #Regarde si il reste encore des Daleks
-        if(self.jeu.nb_dalek_restant == 0):
-            self.jeu.setNextVague()
+            #Regarde si il reste encore des Daleks
+            if(self.jeu.nb_dalek_restant == 0):
+                self.jeu.setNextVague()
             
-        self.vue.afficher(self.jeu)   
+            self.vue.afficher(self.jeu)   
 
         
         
