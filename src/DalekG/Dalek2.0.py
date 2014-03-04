@@ -40,6 +40,7 @@ class Vue2:
         self.boutonRetourMenu = Button(self.root, anchor=S, text='Retour au menu', width=100, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.menu)
         
         self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 28))
+        self.gameOver = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 40))
 
     def deplacement(self, event):
         print(event.x, event.y)
@@ -86,22 +87,21 @@ class Vue2:
                     
                     #Si la case courante correspond a la case de la liste
                     if(x == self.parent.jeu.liste_objets[n].x and y == self.parent.jeu.liste_objets[n].y):
+
+                        print(self.parent.jeu.liste_objets[n].x, self.parent.jeu.liste_objets[n].y)
                         
                         #Si c'est le docteur who
                         if(isinstance(self.parent.jeu.liste_objets[n], DrWho)):
-                            print(self.parent.jeu.liste_objets[n].x, self.parent.jeu.liste_objets[n].y)
                             self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageDrWho)
                             
                         #Si c'est un Dalek
                         elif(isinstance(self.parent.jeu.liste_objets[n], Dalek)):
-                            print(self.parent.jeu.liste_objets[n].x, self.parent.jeu.liste_objets[n].y)
                             self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageDalek)
                             
                         #Si c'est un tas de ferraille
                         elif(isinstance(self.parent.jeu.liste_objets[n], Ferraille)):
                             self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageFerraille)
-                            
-                   
+                                    
                         
         
         
@@ -115,13 +115,18 @@ class Vue2:
     def splashPasZapper(self):
         pass
     def endGame(self):
+        self.surfaceJeu.place_forget()
         self.effacerFrame()
         self.labelBackground.place(x=0, y=0)
         self.boutonRetourMenu.place(width=self.buttonWidth, x=600, y=950)
-        self.textBox.place(height=900, x=0, y=0)
+        self.gameOver.place(height=900, x=0, y=0)   
+        self.gameOver.insert(INSERT, "Game Over")
+        
+        
         
     def menu(self):      
         self.effacerFrame()
+        self.textBox.delete(1.0, END)
         self.labelBackground.place(x=0, y=0)
         self.boutonJouer.place(width=self.buttonWidth, x=600, y=400)
         self.boutonInstructions.place(width=self.buttonWidth, x=600, y=500)
@@ -682,7 +687,6 @@ class DrWho:
                 v_x = -var
                 v_y = 0
 
-            print("Mouvement")
 
             #Determine si le deplacement sera a l'interieur de la zone de jeu
             if(jeu.liste_objets[0].x+v_x < jeu.surface_l and jeu.liste_objets[0].y+v_y < jeu.surface_h and jeu.liste_objets[0].x+v_x >= 0 and jeu.liste_objets[0].y+v_y >= 0):
@@ -761,10 +765,21 @@ class Controleur:
         self.vue.afficher(self.jeu)
 
     def turn(self, vX, vY):
-    
-        #Effectuer le deplacement du joueur
+
+        if(self.jeu.liste_objets[0].x+vX < self.jeu.surface_l and self.jeu.liste_objets[0].y+vY < self.jeu.surface_h and self.jeu.liste_objets[0].x+vX >= 0 and self.jeu.liste_objets[0].y+vY >= 0):
+            for i in range(1, self.jeu.nb_total_objets):
+                #Determine si il y a une piece sur l'endroit ou le joueur veut se deplacer
+                if(self.jeu.liste_objets[0].x+vX == self.jeu.liste_objets[i].x and self.jeu.liste_objets[0].y+vY == self.jeu.liste_objets[i].y):
+                    return 0
+        else:
+            return 0
+            
+        #Change la position du Docteur Who lorsque le deplacement est valide       
         self.jeu.liste_objets[0].x += vX
         self.jeu.liste_objets[0].y += vY
+                    
+           
+        
         
         #Effectuer le deplacement des Daleks
         self.jeu.deplacerDalek(self.jeu)
@@ -778,6 +793,7 @@ class Controleur:
         #Regarde si le docteur est mort
         if (self.jeu.liste_objets[0].notDead(self.jeu) == False):
             self.vue.endGame()
+            return
             
         #Regarde si il reste encore des Daleks
         if(self.jeu.nb_dalek_restant == 0):
