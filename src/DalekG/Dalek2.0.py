@@ -13,7 +13,7 @@ class Vue2:
         self.root = Tk()
         self.root.resizable(0,0)
         self.root.title("Dalek Vs. Dr Who")
-        self.root.geometry("1600x1000")
+        self.root.geometry("1200x800")
 
         #Update la grosseur du frame pour qu'on puisse utiliser winfo
         self.root.update()
@@ -29,6 +29,7 @@ class Vue2:
         self.imageFerraille = PhotoImage(file="ferraille.gif")
         self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
         self.surfaceJeu.bind('<Button-1>', self.deplacement)
+        
         #Variable pour que les boutons soient tous de la meme grosseur
         self.buttonWidth= 400
         
@@ -39,7 +40,7 @@ class Vue2:
         self.boutonQuitter = Button(self.root, text='Quitter',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.root.destroy)
         self.boutonRetourMenu = Button(self.root, anchor=S, text='Retour au menu', width=100, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.menu)
         
-        self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 28))
+        self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 18))
         self.gameOver = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 40))
 
     def deplacement(self, event):
@@ -49,16 +50,16 @@ class Vue2:
         vY = 0
         
         #Gestion du click de souris
-        if(event.x > (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*40)+40)):
+        if(event.x > (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)):
             vX = 1
 
-        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*40))):
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))):
             vX = -1
             
-        if(event.y > (100 + self.parent.jeu.liste_objets[0].y*40)+40):
+        if(event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
             vY = 1
 
-        elif(event.y < (100 + self.parent.jeu.liste_objets[0].y*40)):
+        elif(event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
             vY = -1
         
         self.parent.turn(vX, vY)
@@ -92,15 +93,15 @@ class Vue2:
                         
                         #Si c'est le docteur who
                         if(isinstance(self.parent.jeu.liste_objets[n], DrWho)):
-                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageDrWho)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*32), 80+(y*32), anchor=NW, image=self.imageDrWho)
                             
                         #Si c'est un Dalek
                         elif(isinstance(self.parent.jeu.liste_objets[n], Dalek)):
-                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageDalek)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*32), 80+(y*32), anchor=NW, image=self.imageDalek)
                             
                         #Si c'est un tas de ferraille
                         elif(isinstance(self.parent.jeu.liste_objets[n], Ferraille)):
-                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*40), 100+(y*40), anchor=NW, image=self.imageFerraille)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*32), 80+(y*32), anchor=NW, image=self.imageFerraille)
                                     
                         
         
@@ -118,8 +119,8 @@ class Vue2:
         self.surfaceJeu.place_forget()
         self.effacerFrame()
         self.labelBackground.place(x=0, y=0)
-        self.boutonRetourMenu.place(width=self.buttonWidth, x=600, y=950)
-        self.gameOver.place(height=900, x=0, y=0)   
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
+        self.gameOver.place(height=600, x=0, y=0)   
         self.gameOver.insert(INSERT, "Game Over")
         
         
@@ -128,31 +129,31 @@ class Vue2:
         self.effacerFrame()
         self.textBox.delete(1.0, END)
         self.labelBackground.place(x=0, y=0)
-        self.boutonJouer.place(width=self.buttonWidth, x=600, y=400)
-        self.boutonInstructions.place(width=self.buttonWidth, x=600, y=500)
-        self.boutonHighscore.place(width=self.buttonWidth, x=600, y=600)
-        self.boutonAbout.place(width=self.buttonWidth, x=600, y=700)
-        self.boutonQuitter.place(width=self.buttonWidth, x=600, y=800)
+        self.boutonJouer.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=300)
+        self.boutonInstructions.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=400)
+        self.boutonHighscore.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=500)
+        self.boutonAbout.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=600)
+        self.boutonQuitter.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
         
     def instruction(self):
         self.effacerFrame()
         self.labelBackground.place(x=0, y=0)
-        self.boutonRetourMenu.place(width=self.buttonWidth, x=600, y=950)
-        self.textBox.place(height=900, x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
+        self.textBox.place(height=600, x=0, y=0)
         self.textBox.insert(INSERT,"Les Daleks contre Dr. Who\n")
         self.textBox.insert(INSERT, "_________________________\n")
         self.textBox.insert(INSERT, 'Instruction\n\n\n')
         self.textBox.insert(INSERT,'Votre objectif est de detruire le plus de Daleks possible avant qu_ils ne vous capture. \n\n\nChaque Dalek detruit vous attribut 5 credit galactique.\n\n')
         self.textBox.insert(INSERT,'Utiliser les touches du clavier numerique (1 a 9) pour vous deplacer  et pieger les Daleks\n\n')
-        self.textBox.insert(INSERT,'Vous disposerez d_une arme extrement puissante, le rayon laser cosmique, a utiliser avec parcimonie car ils sont \nresource rare. Pour en declancher un, appuyez sur la touche " - ".\n\n')
-        self.textBox.insert(INSERT,'Vous avez aussi l_habilete de vous teleporter aleatoirement n_importe quand avec la touche " * ", afin de pieger les Daleks\n\n')
+        self.textBox.insert(INSERT,'Vous disposerez d_une arme extrement puissante, le rayon laser cosmique, a utiliser avec parcimonie car ils \nsont une resource rare. Pour en declancher un, appuyez sur la touche " - ".\n\n')
+        self.textBox.insert(INSERT,'Vous avez aussi l_habilete de vous teleporter aleatoirement n_importe quand avec la touche " * ", afin de pieger \nles Daleks\n\n')
         self.textBox.insert(INSERT,'Bonne chance Docteur. Ce n_est qu_une question de temps avant de vous voir succomber...\nSinon, si vous ne vous en croyez plus capable en plein milieu du jeu, appuyez sur "q" pour quitter\n\n\n\n')
 
     def highScore(self):
         self.effacerFrame()
         self.labelBackground.place(x=0, y=0)
-        self.boutonRetourMenu.place(width=self.buttonWidth, x=600, y=950)
-        self.textBox.place(height=900, x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
+        self.textBox.place(height=600, x=0, y=0)
         self.textBox.insert(INSERT,'Les Daleks contre Dr. Who\n')
         self.textBox.insert(INSERT,'_________________________\n\n')
         self.textBox.insert(INSERT,'HighScores\n\n\n')
@@ -165,8 +166,8 @@ class Vue2:
     def about(self):
         self.effacerFrame()
         self.labelBackground.place(x=0, y=0)
-        self.boutonRetourMenu.place(width=self.buttonWidth, x=600, y=950)
-        self.textBox.place(height=900, x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
+        self.textBox.place(height=600, x=0, y=0)
         self.textBox.insert(INSERT,'Les Daleks contre Dr. Who\n')
         self.textBox.insert(INSERT,'_________________________\n')
         self.textBox.insert(INSERT,'A propos\n\n\n\n')
@@ -190,7 +191,7 @@ class Vue2:
 
     #Cette fonction permet de calculer la position initiale en x
     def trouverDepartX(self):
-        return ((self.root.winfo_width()-(self.parent.jeu.surface_l*40))/2)
+        return ((self.root.winfo_width()-(self.parent.jeu.surface_l*32))/2)
     
     
 
@@ -302,7 +303,7 @@ class Vue:
 
 
     def getUserInput(self):
-
+        
         return msvcrt.getch()
 
     def splashPasZapper(self):
