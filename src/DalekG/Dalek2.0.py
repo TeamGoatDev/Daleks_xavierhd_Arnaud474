@@ -28,7 +28,7 @@ class Vue2:
         self.imageDrWho = PhotoImage(file="drwho.gif")
         self.imageFerraille = PhotoImage(file="ferraille.gif")
         self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
-        self.surfaceJeu.bind('<Button-1>', self.getUserInput)
+        self.surfaceJeu.bind('<Button-1>', self.deplacement)
         
         #Variable pour que les boutons soient tous de la meme grosseur
         self.buttonWidth= 400
@@ -43,56 +43,27 @@ class Vue2:
         self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 18))
         self.gameOver = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 40))
 
-    def getUserInput(self, event):
+    def deplacement(self, event):
         print(event.x, event.y)
-        
-        keyCode = None
+
+        vX = 0
+        vY = 0
         
         #Gestion du click de souris
+        if(event.x > (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)):
+            vX = 1
 
-        #Si le click est au Sud-Ouest du Docteur
-        if(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
-            keyCode = 1
-
-        #Si le click est au Sud du Docteur
-        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
-             and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
-            keyCode = 2
-
-        #Si le click est au Sud-Est du Docteur   
-        elif(event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32 and event.x >(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)):
-            keyCode = 3
-
-        #Si le click est a l'Ouest du Docteur
-        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
-             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
-            keyCode = 4
-
-        #Si le click est directement sur le Docteur
-        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
-             and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32) and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
-            keyCode = 5
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))):
+            vX = -1
             
-        #Si le click est a l'Est du Docteur
-        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
-             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
-            keyCode = 6
+        if(event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
+            vY = 1
 
-        #Si le click est au Nord-Ouest du Docteur
-        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
-            keyCode = 7
-
-        #Si le click est au Nord du Docteur
-        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
-             and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
-            keyCode = 8
-
-        #Si le click est au Nord-Est du Docteur
-        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
-            keyCode = 9
-            
+        elif(event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            vY = -1
         
-        self.parent.turn(keyCode)
+        self.parent.turn(vX, vY)
+        
         
     def afficher(self, jeu):
         
@@ -140,7 +111,57 @@ class Vue2:
         pass
     def splashNiveau(self, jeu):
         pass
-    
+    def getUserInputCode(self,event):
+        print(event.x, event.y)
+        
+        keyCode = None
+        
+        #Gestion du click de souris
+
+        #Si le click est au Sud-Ouest du Docteur
+        if(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
+            keyCode = 1
+
+        #Si le click est au Sud du Docteur
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
+             and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
+            keyCode = 2
+
+        #Si le click est au Sud-Est du Docteur   
+        elif(event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32 and event.x >(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)):
+            keyCode = 3
+
+        #Si le click est a l'Ouest du Docteur
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
+             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+            keyCode = 4
+
+        #Si le click est directement sur le Docteur
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
+             and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32) and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+            keyCode = 5
+            
+        #Si le click est a l'Est du Docteur
+        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
+             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+            keyCode = 6
+
+        #Si le click est au Nord-Ouest du Docteur
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            keyCode = 7
+
+        #Si le click est au Nord du Docteur
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
+             and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            keyCode = 8
+
+        #Si le click est au Nord-Est du Docteur
+        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            keyCode = 9
+            
+        self.parent.turn(keyCode)
+
+
     def splashPasZapper(self):
         pass
     def endGame(self):
@@ -330,10 +351,14 @@ class Vue:
         time.sleep(2)
 
 
+
     def getUserInput(self):
         
+        return msvcrt.getch()
+
+    def getUserInputCode(self):
+        
         key = msvcrt.getch()
-  
         try:
             return int(key)
         except:
@@ -358,7 +383,7 @@ class Vue:
             print('\n\nAppuyer sur 4 pour enregistrer votre score')
         print('\n\n\n\nVoulez-vous recommencer une partie? oui[1] ou non[2]')
 
-        retour = self.getUserInput()
+        retour = self.getUserInputCode()
 
         if(retour == b'4'):
             self.parent.jeu.setHightScore(self.getUserName(self.parent.jeu))
@@ -379,19 +404,19 @@ class Vue:
             print('4. About\n\n')
             print('5. Quitter')
         
-            retourMenu = self.getUserInput()
+            retourMenu = self.getUserInputCode()
             
-            if (retourMenu == b'1'):
+            if (retourMenu == 1):
                 retour = b'1'
                 while(retour == b'1'):
                     retour = self.parent.gameLOOP()
-            elif (retourMenu == b'2'):
+            elif (retourMenu == 2):
                 self.instruction()
-            elif(retourMenu == b'3'):
+            elif(retourMenu == 3):
                 self.parent.vue.hightScore(self.parent.jeu.getHightScore())
-            elif (retourMenu == b'4'):
+            elif (retourMenu == 4):
                 self.about()
-            elif (retourMenu == b'5'):
+            elif (retourMenu == 5):
                 os.system('cls')
                 return 0
 
@@ -412,7 +437,7 @@ class Vue:
         print('Vous avez aussi l_habilete de vous teleporter aleatoirement n_importe quand avec la touche " * ", afin de pieger les Daleks\n\n')
         print('Bonne chance Docteur. Ce n_est qu_une question de temps avant de vous voir succomber...\nSinon, si vous ne vous en croyez plus capable en plein milieu du jeu, appuyez sur "q" pour quitter\n\n\n\n')
         print('Pesez sur une touche pour retourner au menu principal')
-        self.getUserInput()
+        self.getUserInputCode()
 
     def about(self):
         os.system('cls')
@@ -421,12 +446,12 @@ class Vue:
         print('A propos\n\n\n\n')
         print('Projet realiser par Arnaud et Xavier \n\n\nGit du projet: https://github.com/TeamGoatDev/Daleks_xavierhd_Arnaud474\n\n\n\n')
         print('Pesez sur une touche pour retourner au menu principal')
-        self.getUserInput()
+        self.getUserInputCode()
 
     def questionQuitterEnPartie(self):
         os.system('cls')
         print('\n\n\n\nQuitter?    oui[1] ou non[2]')
-        return self.getUserInput()
+        return self.getUserInputCode()
 
     def hightScore(self, hightScore):
         os.system('cls')
@@ -440,7 +465,7 @@ class Vue:
             print('Il n_y a pas encore de hightScores...\n\nA vous de jouer!!!')
 
         print('\n\n\n\nPesez sur une touche pour retourner au menu principal')
-        self.getUserInput()
+        self.getUserInputCode()
 
     def getUserName(self, jeu):
         os.system('cls')
@@ -672,9 +697,9 @@ class DrWho:
      #Fonction qui gere le deplacement du joueur
     def deplacer(self, jeu, key):
 
-        var = 1
+        var = 1#variable pour augmenter la largeure du déplacement du joueur
 
-        if(key == b'*' or key == b'-' or key == b'q'):#Teleportation #Zappeur
+        if(key == 10 or key == 11 or key == 12):#Teleportation #Zappeur
             return key
         else:
             #Variables pour la variation de x et y
@@ -682,47 +707,47 @@ class DrWho:
             v_y = 0
             
             #Deplacement vers le bas a gauche
-            if(key == b'1'):
+            if(key == 1):
                 v_x = -var
                 v_y = var
             
             #Deplacement vers le bas
-            if(key == b'2'):
+            if(key == 2):
                 v_x = 0
                 v_y = var
 
             #Deplacement vers le bas a droite
-            if(key == b'3'):
+            if(key == 3):
                 v_x = var
                 v_y = var
 
             #Pas de deplacement
-            if(key == b'5'):
+            if(key == 5):
                 v_x = 0
                 v_y = 0
 
             #Depplacement vers la droite
-            if(key == b'6'):
+            if(key == 6):
                 v_x = var
                 v_y = 0
 
             #Deplacement vers le haut a droite
-            if(key == b'9'):
+            if(key == 9):
                 v_x = var
                 v_y = -var
 
             #Deplacement vers le haut
-            if(key == b'8'):
+            if(key == 8):
                 v_x = 0
                 v_y = -var
 
             #Deplacement vers le haut a gauche
-            if(key == b'7'):
+            if(key == 7):
                 v_x = -var
                 v_y = -var
 
             #Deplacement vers la gauche
-            if(key == b'4'):
+            if(key == 4):
                 v_x = -var
                 v_y = 0
 
@@ -788,30 +813,27 @@ class Controleur:
 
     def __init__(self):
         self.jeu = Jeu(self)
-        try:#en commentaire car pas encore coder
-            if(sys.argv[1] == '-shell'):
+        try:
+            if(sys.argv[1] == '-shell'):#argument 0 est le nom du fichier, le 1 est le parametre entrer qui le suit.
                 self.vue = Vue(self)
         
         except:
             self.vue = Vue2(self)
-  
-        self.vue.menu()
-        self.vue.root.mainloop()  
+            self.vue.root.mainloop() 
+            self.vue.menu()
+         
 
     def newGame(self):
         self.jeu.reset()
         self.jeu.setNextVague()
         self.vue.afficher(self.jeu)
 
-    def turn(self, keyCode):
+    def turn(self, vX, vY):
 
         #Regarde si le deplacement est valide          
         valide = self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)
         
-        if(valide == False):
-            return
-        
-        else:
+        if(valide):
             #Effectuer le deplacement des Daleks
             self.jeu.deplacerDalek(self.jeu)
 
@@ -830,7 +852,7 @@ class Controleur:
             if(self.jeu.nb_dalek_restant == 0):
                 self.jeu.setNextVague()
             
-            self.vue.afficher(self.jeu)   
+            self.vue.afficher(self.jeu)
 
         
         
@@ -852,7 +874,7 @@ class Controleur:
                 self.jeu.denombreDalek()
                 drWhoIsNotDead = self.jeu.liste_objets[0].notDead(self.jeu)       
                 if(not continuer):
-                    if(self.vue.questionQuitterEnPartie() == b'1'):
+                    if(self.vue.questionQuitterEnPartie() == 1):
                         return None
         else:
             if(self.jeu.points > 0):
@@ -874,12 +896,12 @@ class Controleur:
             recommencer = False
             
             #Deplacement du joueur
-            retour = self.jeu.liste_objets[0].deplacer(self.jeu, self.vue.getUserInput()) #retourne la touche special appuyer par le joueur ou change sa position si touche normal
+            retour = self.jeu.liste_objets[0].deplacer(self.jeu, self.vue.getUserInputCode()) #retourne la touche special appuyer par le joueur ou change sa position si touche normal
             
-            if(retour == b'*'):#teleportation
+            if(retour == 10):#teleportation
                 recommencer = self.jeu.liste_objets[0].teleportation(self.jeu)
 
-            elif(retour == b'-'):#zappeur
+            elif(retour == 11):#zappeur
                 if(self.jeu.liste_objets[0].nb_zapper > 0):
                     self.jeu.liste_objets[0].zapper(self.jeu)#suppressionDalek supprime les elements qui sont retourner par la fonction qu_elle a en parametre (le zap de drwho) 
                     self.vue.zapAnimation(self.jeu) #Affichage du zap sur l'espace de jeu
@@ -889,7 +911,7 @@ class Controleur:
                     recommencer = True
             elif(retour == 0):
                 recommencer = True
-            elif(retour == b'q'):   #pour quitter en pleine partie
+            elif(retour == 12):   #pour quitter en pleine partie
                 return False
 
         #Affichage de la surface de jeu
@@ -910,6 +932,6 @@ class Controleur:
 
 
 if __name__ == "__main__":
-    c = Controleur()#argument 0 est le nom du fichier, le 1 est le parametre entrer qui le suit.
+    c = Controleur()
     
 
