@@ -28,7 +28,7 @@ class Vue2:
         self.imageDrWho = PhotoImage(file="drwho.gif")
         self.imageFerraille = PhotoImage(file="ferraille.gif")
         self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
-        self.surfaceJeu.bind('<Button-1>', self.deplacement)
+        self.surfaceJeu.bind('<Button-1>', self.getUserInputCode())
         
         #Variable pour que les boutons soient tous de la meme grosseur
         self.buttonWidth= 400
@@ -42,27 +42,6 @@ class Vue2:
         
         self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 18))
         self.gameOver = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 40))
-
-    def deplacement(self, event):
-        print(event.x, event.y)
-
-        vX = 0
-        vY = 0
-        
-        #Gestion du click de souris
-        if(event.x > (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)):
-            vX = 1
-
-        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))):
-            vX = -1
-            
-        if(event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
-            vY = 1
-
-        elif(event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
-            vY = -1
-        
-        self.parent.turn(vX, vY)
         
         
     def afficher(self, jeu):
