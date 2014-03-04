@@ -1,3 +1,4 @@
+from tkinter import *
 import random
 import os
 import sys
@@ -5,34 +6,229 @@ import msvcrt
 import time
 
 class Vue2:
-    def __init__(self):
-        pass
+    def __init__(self,parent):
+        self.parent = parent
+
+        #Parametres de la fenetre
+        self.root = Tk()
+        self.root.resizable(0,0)
+        self.root.title("Dalek Vs. Dr Who")
+        self.root.geometry("1200x800")
+
+        #Update la grosseur du frame pour qu'on puisse utiliser winfo
+        self.root.update()
+
+        #Background pour le menu
+        self.imageBackground = PhotoImage(file="bg.gif")    
+        self.labelBackground = Label(self.root,image=self.imageBackground)
+
+        #Surface de jeu
+        self.imageSurface = PhotoImage(file="space.gif")
+        self.imageDalek = PhotoImage(file="dalek.gif")
+        self.imageDrWho = PhotoImage(file="drwho.gif")
+        self.imageFerraille = PhotoImage(file="ferraille.gif")
+        self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
+        self.surfaceJeu.bind('<Button-1>', self.deplacement)
+        
+        #Variable pour que les boutons soient tous de la meme grosseur
+        self.buttonWidth= 400
+        
+        self.boutonJouer = Button(self.root, text='Jouer',width=50, bg='black', fg='white',activebackground='black', activeforeground='white',command=self.parent.newGame)
+        self.boutonInstructions = Button(self.root, text='Instructions',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.instruction)
+        self.boutonHighscore = Button(self.root, text='Highscore',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.highScore)
+        self.boutonAbout = Button(self.root, text='About',width=50, bg='black', fg='white',activebackground='black', activeforeground='white',command=self.about)
+        self.boutonQuitter = Button(self.root, text='Quitter',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.root.destroy)
+        self.boutonRetourMenu = Button(self.root, anchor=S, text='Retour au menu', width=100, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.menu)
+        
+        self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 18))
+        self.gameOver = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 40))
+
+    def getUserInput(self, event):
+        print(event.x, event.y)
+        
+        keyCode = None
+        
+        #Gestion du click de souris
+
+        #Si le click est au Sud-Ouest du Docteur
+        if(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
+            keyCode = 1
+
+        #Si le click est au Sud du Docteur
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
+             and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
+            keyCode = 2
+
+        #Si le click est au Sud-Est du Docteur   
+        elif(event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32 and event.x >(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)):
+            keyCode = 3
+
+        #Si le click est a l'Ouest du Docteur
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
+             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+            keyCode = 4
+
+        #Si le click est directement sur le Docteur
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
+             and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32) and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+            keyCode = 5
+            
+        #Si le click est a l'Est du Docteur
+        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
+             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+            keyCode = 6
+
+        #Si le click est au Nord-Ouest du Docteur
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            keyCode = 7
+
+        #Si le click est au Nord du Docteur
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
+             and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            keyCode = 8
+
+        #Si le click est au Nord-Est du Docteur
+        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+            keyCode = 9
+            
+        
+        self.parent.turn(keyCode)
+        
     def afficher(self, jeu):
-        pass
+        
+        #Effacage initial du frame pour pouvoir 
+        self.effacerFrame()
+        
+        #Creation de l'image pour la surface de jeu et ajout du canevas
+        self.surfaceJeu.create_image(0,0, anchor=NW, image=self.imageSurface)
+
+        #Test pour la premiere position ainsi que le fonctionnement d'une image dans un canevas
+        #self.surfaceJeu.create_image(self.trouverDepartX(), 100, anchor=NW, image=self.imageDalek)
+
+        self.surfaceJeu.place(x=0, y=0)
+
+        for y in range(0, self.parent.jeu.surface_h):
+            for x in range(0, self.parent.jeu.surface_l):
+
+                case_vide = True
+                
+                #Regarde dans la liste si il y a un element a cette position
+                for n in range(0, self.parent.jeu.nb_total_objets):
+                    
+                    #Si la case courante correspond a la case de la liste
+                    if(x == self.parent.jeu.liste_objets[n].x and y == self.parent.jeu.liste_objets[n].y):
+
+                        print(self.parent.jeu.liste_objets[n].x, self.parent.jeu.liste_objets[n].y)
+                        
+                        #Si c'est le docteur who
+                        if(isinstance(self.parent.jeu.liste_objets[n], DrWho)):
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*32), 80+(y*32), anchor=NW, image=self.imageDrWho)
+                            
+                        #Si c'est un Dalek
+                        elif(isinstance(self.parent.jeu.liste_objets[n], Dalek)):
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*32), 80+(y*32), anchor=NW, image=self.imageDalek)
+                            
+                        #Si c'est un tas de ferraille
+                        elif(isinstance(self.parent.jeu.liste_objets[n], Ferraille)):
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*32), 80+(y*32), anchor=NW, image=self.imageFerraille)
+                                    
+                        
+        
+        
+        
     def zapAnimation(self, jeu):
         pass
     def splashNiveau(self, jeu):
         pass
-    def getUserInput(self):
-        pass
+    
     def splashPasZapper(self):
         pass
-    def endGame(self, jeu):
-        pass
-    def menu(self):
-        pass
+    def endGame(self):
+        self.surfaceJeu.place_forget()
+        self.effacerFrame()
+        self.labelBackground.place(x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
+        self.gameOver.place(height=600, x=0, y=0)   
+        self.gameOver.insert(INSERT, "Game Over")
+        
+        
+        
+    def menu(self):      
+        self.effacerFrame()
+        self.textBox.delete(1.0, END)
+        self.labelBackground.place(x=0, y=0)
+        self.boutonJouer.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=300)
+        self.boutonInstructions.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=400)
+        self.boutonHighscore.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=500)
+        self.boutonAbout.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=600)
+        self.boutonQuitter.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
+        
     def instruction(self):
-        pass
+        self.effacerFrame()
+        self.labelBackground.place(x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
+        self.textBox.place(height=600, x=0, y=0)
+        self.textBox.insert(INSERT,"Les Daleks contre Dr. Who\n")
+        self.textBox.insert(INSERT, "_________________________\n")
+        self.textBox.insert(INSERT, 'Instruction\n\n\n')
+        self.textBox.insert(INSERT,'Votre objectif est de detruire le plus de Daleks possible avant qu_ils ne vous capture. \n\n\nChaque Dalek detruit vous attribut 5 credit galactique.\n\n')
+        self.textBox.insert(INSERT,'Utiliser les touches du clavier numerique (1 a 9) pour vous deplacer  et pieger les Daleks\n\n')
+        self.textBox.insert(INSERT,'Vous disposerez d_une arme extrement puissante, le rayon laser cosmique, a utiliser avec parcimonie car ils \nsont une resource rare. Pour en declancher un, appuyez sur la touche " - ".\n\n')
+        self.textBox.insert(INSERT,'Vous avez aussi l_habilete de vous teleporter aleatoirement n_importe quand avec la touche " * ", afin de pieger \nles Daleks\n\n')
+        self.textBox.insert(INSERT,'Bonne chance Docteur. Ce n_est qu_une question de temps avant de vous voir succomber...\nSinon, si vous ne vous en croyez plus capable en plein milieu du jeu, appuyez sur "q" pour quitter\n\n\n\n')
+
+    def highScore(self):
+        self.effacerFrame()
+        self.labelBackground.place(x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
+        self.textBox.place(height=600, x=0, y=0)
+        self.textBox.insert(INSERT,'Les Daleks contre Dr. Who\n')
+        self.textBox.insert(INSERT,'_________________________\n\n')
+        self.textBox.insert(INSERT,'HighScores\n\n\n')
+        """if(hightScore):
+            for i in highScore:
+               self.textBox.insert(INSERT, i + '\n\n')
+        else:
+            self.textBox.insert(INSERT,'Il n_y a pas encore de hightScores...\n\nA vous de jouer!!!')"""
+       
     def about(self):
-        pass
+        self.effacerFrame()
+        self.labelBackground.place(x=0, y=0)
+        self.boutonRetourMenu.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
+        self.textBox.place(height=600, x=0, y=0)
+        self.textBox.insert(INSERT,'Les Daleks contre Dr. Who\n')
+        self.textBox.insert(INSERT,'_________________________\n')
+        self.textBox.insert(INSERT,'A propos\n\n\n\n')
+        self.textBox.insert(INSERT,'Projet realiser par Arnaud et Xavier \n\n\nGit du projet: https://github.com/TeamGoatDev/Daleks_xavierhd_Arnaud474\n\n\n\n')
+        self.textBox.insert(INSERT,'Pesez sur une touche pour retourner au menu principal')
+        
+        
     def questionQuitterEnPartie(self):
         pass
+
+    #Cette fonction permet d'enlever toutes les composantes presentes sur le frame sans le detruire
+    def effacerFrame(self):
+    
+        listeWidgets = self.root.winfo_children()
+
+        for i in listeWidgets:
+            i.pack_forget()
+            i.place_forget()
+
+        
+
+    #Cette fonction permet de calculer la position initiale en x
+    def trouverDepartX(self):
+        return ((self.root.winfo_width()-(self.parent.jeu.surface_l*32))/2)
+    
+    
 
 
 
 #Declaration des objets
 class Vue:
-    def __init__(self):
+    def __init__(self, parent):
+        self.parent = parent
         os.system('mode con:cols=125 lines=60')
     
     #Fonction qui fait l'affichage de jeu dans la console
@@ -135,8 +331,18 @@ class Vue:
 
 
     def getUserInput(self):
-
-        return msvcrt.getch()
+        
+        key = msvcrt.getch()
+  
+        try:
+            return int(key)
+        except:
+            if key == b'*':
+                return 10
+            elif key == b'-':
+                return 11
+            elif key == b'q':
+                return 12
 
     def splashPasZapper(self):
         os.system('cls')
@@ -151,18 +357,46 @@ class Vue:
         if(not scoreDejaEntre):
             print('\n\nAppuyer sur 4 pour enregistrer votre score')
         print('\n\n\n\nVoulez-vous recommencer une partie? oui[1] ou non[2]')
-        return self.getUserInput()
+
+        retour = self.getUserInput()
+
+        if(retour == b'4'):
+            self.parent.jeu.setHightScore(self.getUserName(self.parent.jeu))
+        elif(retour == b'1'):
+            return retour
+        
+            
 
     def menu(self):
-        os.system('cls')
-        print('Les Daleks contre Dr. Who')
-        print('_________________________\n\n\n')
-        print('1. Jouer\n\n')
-        print('2. Instruction\n\n')
-        print('3. HightScores\n\n')
-        print('4. About\n\n')
-        print('5. Quitter')
-        return self.getUserInput()
+
+        while (True):#boucle infini tant que le retour de la fonction nest pas appele
+            os.system('cls')
+            print('Les Daleks contre Dr. Who')
+            print('_________________________\n\n\n')
+            print('1. Jouer\n\n')
+            print('2. Instruction\n\n')
+            print('3. HightScores\n\n')
+            print('4. About\n\n')
+            print('5. Quitter')
+        
+            retourMenu = self.getUserInput()
+            
+            if (retourMenu == b'1'):
+                retour = b'1'
+                while(retour == b'1'):
+                    retour = self.parent.gameLOOP()
+            elif (retourMenu == b'2'):
+                self.instruction()
+            elif(retourMenu == b'3'):
+                self.parent.vue.hightScore(self.parent.jeu.getHightScore())
+            elif (retourMenu == b'4'):
+                self.about()
+            elif (retourMenu == b'5'):
+                os.system('cls')
+                return 0
+
+        
+        
 
     def instruction(self):
         os.system('cls')
@@ -216,15 +450,16 @@ class Vue:
 
 
 class Jeu:
-    def __init__(self):
+    def __init__(self, parent):
+        self.parent = parent
         self.points = 0                 #Variable qui contient le nombre de points accumules par le joueur
         self.vague = 0                  #Numero de la vague en cours
         self.nb_dalek_restant = 0       #Nombre total des Daleks restant dans la liste
         self.nb_total_dalek = 0         #Nombre total de Dalek pour la vague courrante
         self.nb_total_objets = 0        #Nombre d'elements dans la liste
         self.liste_objets = []          #Liste qui contiendra les daleks et le docteur
-        self.surface_l = 20             #Largeur de la surface de jeu
-        self.surface_h = 30             #Hauteur de la surface de jeu
+        self.surface_l = 30             #Largeur de la surface de jeu
+        self.surface_h = 20             #Hauteur de la surface de jeu
 
     def setNextVague(self):
         self.nb_total_dalek += 5
@@ -244,8 +479,8 @@ class Jeu:
         self.nb_total_dalek = 0         
         self.nb_total_objets = 0        
         self.liste_objets[:] = []         
-        self.surface_l = 20
-        self.surface_h = 30  
+        self.surface_l = 30
+        self.surface_h = 20  
 
     def deplacerDalek(self,jeu):
         for i in range(1, self.nb_total_objets): #regarde tout les objets de la liste
@@ -489,7 +724,8 @@ class DrWho:
             #Deplacement vers la gauche
             if(key == b'4'):
                 v_x = -var
-                v_y = 0 
+                v_y = 0
+
 
             #Determine si le deplacement sera a l'interieur de la zone de jeu
             if(jeu.liste_objets[0].x+v_x < jeu.surface_l and jeu.liste_objets[0].y+v_y < jeu.surface_h and jeu.liste_objets[0].x+v_x >= 0 and jeu.liste_objets[0].y+v_y >= 0):
@@ -551,35 +787,52 @@ class Ferraille:
 class Controleur:
 
     def __init__(self):
-        self.jeu = Jeu()
-        #try:#en commentaire car pas encore coder
-            #if(sys.argv[1] == '-shell'):
-                #self.vue = Vue()
-        self.vue = Vue()
-        #except:
-            #self.vue = Vue2()
+        self.jeu = Jeu(self)
+        try:#en commentaire car pas encore coder
+            if(sys.argv[1] == '-shell'):
+                self.vue = Vue(self)
+        
+        except:
+            self.vue = Vue2(self)
+  
+        self.vue.menu()
+        self.vue.root.mainloop()  
+
+    def newGame(self):
+        self.jeu.reset()
+        self.jeu.setNextVague()
+        self.vue.afficher(self.jeu)
+
+    def turn(self, keyCode):
+
+        #Regarde si le deplacement est valide          
+        valide = self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)
+        
+        if(valide == False)
+            return
+        
+        else:
+            #Effectuer le deplacement des Daleks
+            self.jeu.deplacerDalek(self.jeu)
+
+            #Fonction qui gere les collisions entre les Daleks
+            self.jeu.collision()
+
+            #Regarde le nombre de Daleks restants
+            self.jeu.denombreDalek()
+
+            #Regarde si le docteur est mort
+            if (self.jeu.liste_objets[0].notDead(self.jeu) == False):
+                self.vue.endGame()
+                return
+            
+            #Regarde si il reste encore des Daleks
+            if(self.jeu.nb_dalek_restant == 0):
+                self.jeu.setNextVague()
+            
+            self.vue.afficher(self.jeu)   
 
         
-
-    def main(self):
-
-        while (True):#boucle infini tant que le retour de la fonction nest pas appele
-            retourMenu = self.vue.menu() #fonction menu ICI
-            
-            if (retourMenu == b'1'):
-                retour = b'1'
-                while(retour == b'1'):
-                    retour = self.gameLOOP()
-            elif (retourMenu == b'2'):
-                self.vue.instruction()
-            elif(retourMenu == b'3'):
-                self.vue.hightScore(self.jeu.getHightScore())
-            elif (retourMenu == b'4'):
-                self.vue.about()
-            elif (retourMenu == b'5'):
-                os.system('cls')
-                return 0
-
         
 
     def gameLOOP(self):
@@ -603,15 +856,10 @@ class Controleur:
                         return None
         else:
             if(self.jeu.points > 0):
-                retour = self.vue.endGame(self.jeu)
-                if(retour == b'4'):
-                    self.jeu.setHightScore(self.vue.getUserName(self.jeu))
-                elif(retour == b'1'):
-                    return b'1'
-                elif(retour == b'2'):
-                    return b'2'
+                return self.vue.endGame(self.jeu)
+                
 
-            return self.vue.endGame(self.jeu, True) #score deja entree
+            #return self.vue.endGame(self.jeu, True) #score deja entree
 
 
     def runLevel(self):
@@ -620,14 +868,14 @@ class Controleur:
 
         while (recommencer):
 
-            #Affichage de la surface de jeu 
+            #Affichage de la surface de jeu
             self.vue.afficher(self.jeu)
             
             recommencer = False
             
             #Deplacement du joueur
             retour = self.jeu.liste_objets[0].deplacer(self.jeu, self.vue.getUserInput()) #retourne la touche special appuyer par le joueur ou change sa position si touche normal
-        
+            
             if(retour == b'*'):#teleportation
                 recommencer = self.jeu.liste_objets[0].teleportation(self.jeu)
 
@@ -646,7 +894,6 @@ class Controleur:
 
         #Affichage de la surface de jeu
         self.vue.afficher(self.jeu)
-        time.sleep(0.5)
 
         """#Afficher les positions a des fin de debugage
         for i in range(0, self.jeu.nb_total_objets):
@@ -664,5 +911,5 @@ class Controleur:
 
 if __name__ == "__main__":
     c = Controleur()#argument 0 est le nom du fichier, le 1 est le parametre entrer qui le suit.
+    
 
-    sys.exit(c.main())
