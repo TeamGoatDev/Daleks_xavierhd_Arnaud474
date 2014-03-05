@@ -28,7 +28,7 @@ class Vue2:
         self.imageDrWho = PhotoImage(file="drwho.gif")
         self.imageFerraille = PhotoImage(file="ferraille.gif")
         self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
-        self.surfaceJeu.bind('<Button-1>', self.getUserInputCode())
+        self.surfaceJeu.bind('<Button-1>', self.getUserInputCode)
         
         #Variable pour que les boutons soient tous de la meme grosseur
         self.buttonWidth= 400
@@ -42,7 +42,7 @@ class Vue2:
         
         self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 18))
         self.gameOver = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 40))
-        
+
         
     def afficher(self, jeu):
         
