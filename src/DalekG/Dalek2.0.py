@@ -795,11 +795,12 @@ class Controleur:
         try:
             if(sys.argv[1] == '-shell'):#argument 0 est le nom du fichier, le 1 est le parametre entrer qui le suit.
                 self.vue = Vue(self)
-        
+                self.vue.menu()
         except:
             self.vue = Vue2(self)
-            self.vue.root.mainloop() 
             self.vue.menu()
+            self.vue.root.mainloop() 
+            
          
 
     def newGame(self):
@@ -807,7 +808,7 @@ class Controleur:
         self.jeu.setNextVague()
         self.vue.afficher(self.jeu)
 
-    def turn(self, vX, vY):
+    def turn(self, keyCode):
 
         #Regarde si le deplacement est valide          
         valide = self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)
