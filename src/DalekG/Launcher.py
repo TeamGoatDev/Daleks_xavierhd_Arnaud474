@@ -1,5 +1,5 @@
 from tkinter import *
-import os
+import subprocess
 
 class Affichage():
     def __init__(self, parent):
@@ -13,19 +13,18 @@ class Affichage():
         self.root.update()
 
         #Background pour le menu
-        self.imageBackground = PhotoImage(file="bg.gif")    
+        self.imageBackground = PhotoImage(file="bg.gif")
         self.labelBackground = Label(self.root,image=self.imageBackground)
-        
+
         #Boutons
         self.boutonShell = Button(self.root, text='Lancer en Console', bg='black', fg='white', activebackground='blue', activeforeground='white', command=self.parent.launchConsole)
         self.boutonGraphique = Button(self.root, text='Lancer en GUI', bg='black', fg='white', activebackground='blue', activeforeground='white', command=self.parent.launchGUI)
-        
+
 
     def menu(self):
         self.labelBackground.place(x=0, y=0)
         self.boutonShell.place(y=300, width=self.root.winfo_width()/2, height=self.root.winfo_height()-400)
         self.boutonGraphique.place(x=599, y=300,width=self.root.winfo_width()/2, height=self.root.winfo_height()-400)
-        
 class Launch():
     def __init__(self):
         self.affichage=Affichage(self)
@@ -34,21 +33,46 @@ class Launch():
 
     def launchConsole(self):
         self.affichage.root.destroy()
+        try:
+            subprocess.call("C:\Python32\python.exe Dalek2.0.py -shell")
+        except OSError:
+            try:
+                subprocess.call("C:\Python33\python.exe Dalek2.0.py -shell")
+            except OSError:
+                try:
+                    subprocess.call("python Dalek2.0.py -shell")
+                except OSError:
+                    try:#cas xavier
+                        subprocess.call("C:\Program Files\Python33 Dalek2.0.py -shell")
+                    except OSError:
+                        raise SystemExit
         
-        os.system("C:\Python32\python.exe Dalek2.0.py -shell")
-        os.system("C:\Python33\python.exe Dalek2.0.py -shell")
-                
-        
+
 
     def launchGUI(self):
-        self.affichage.root.destroy()     
-        os.system("C:\Python32\python.exe Dalek2.0.py")
-        os.system("C:\Python33\python.exe Dalek2.0.py")
-    
+        self.affichage.root.destroy()
+        try:
+            subprocess.call("C:\Python32\python.exe Dalek2.0.py")
+        except OSError:
+            try:
+                subprocess.call("C:\Python33\python.exe Dalek2.0.py")
+            except OSError:
+                try:
+                    subprocess.call("python Dalek2.0.py")
+                except OSError:
+                    try:#cas xavier
+                        subprocess.call("C:\Program Files\Python33 Dalek2.0.py")
+                    except OSError:
+                        raise SystemExit
         
 
-    
-        
-   
+
+
+
+
+#    python launcher.py
+
+
+
 if __name__ == '__main__':
     c=Launch()
