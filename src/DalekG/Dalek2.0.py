@@ -22,6 +22,12 @@ class Vue2:
         self.imageBackground = PhotoImage(file="bg.gif")    
         self.labelBackground = Label(self.root,image=self.imageBackground)
 
+        #Offset Y
+        self.offSetY = 20
+
+        #Size des pieces
+        self.sizePieces = 32
+
         #Surface de jeu
         self.imageSurface = PhotoImage(file="space.gif")
         self.imageDalek = PhotoImage(file="dalek.gif")
@@ -35,10 +41,13 @@ class Vue2:
         
         self.boutonJouer = Button(self.root, text='Jouer',width=50, bg='black', fg='white',activebackground='black', activeforeground='white',command=self.parent.newGame)
         self.boutonInstructions = Button(self.root, text='Instructions',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.instruction)
-        self.boutonHighscore = Button(self.root, text='Highscore',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.highScore)
+        self.boutonHighscore = Button(self.root, text='Highscore',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command= lambda: self.highScore(self.parent.jeu.getHighScore()))
         self.boutonAbout = Button(self.root, text='About',width=50, bg='black', fg='white',activebackground='black', activeforeground='white',command=self.about)
         self.boutonQuitter = Button(self.root, text='Quitter',width=50, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.root.destroy)
-        self.boutonRetourMenu = Button(self.root, anchor=S, text='Retour au menu', width=100, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.menu)
+        self.boutonRetourMenu = Button(self.root, text='Retour au menu', width=100, bg='black', fg='white',activebackground='black', activeforeground='white', command=self.menu)
+        self.boutonTeleportation = Button(self.root, text='Teleportation', width=50, bg='black', fg='white', activebackground='blue', activeforeground='white', command= lambda: self.parent.turn(10))
+        self.boutonZappeur = Button(self.root, text='Zappeur', width=50, bg='black', fg='white', activebackground='blue', activeforeground='white', command= lambda: self.parent.turn(11))
+
         
         self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 18))
         self.gameOver = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 40))
@@ -55,7 +64,7 @@ class Vue2:
         #Test pour la premiere position ainsi que le fonctionnement d'une image dans un canevas
         #self.surfaceJeu.create_image(self.trouverDepartX(), 100, anchor=NW, image=self.imageDalek)
 
-        self.surfaceJeu.place(x=0, y=0)
+        self.surfaceJeu.place(x=-1, y=-1)
 
         for y in range(0, self.parent.jeu.surface_h):
             for x in range(0, self.parent.jeu.surface_l):
@@ -72,22 +81,34 @@ class Vue2:
                         
                         #Si c'est le docteur who
                         if(isinstance(self.parent.jeu.liste_objets[n], DrWho)):
-                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*32), 80+(y*32), anchor=NW, image=self.imageDrWho)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*self.sizePieces), self.offSetY+(y*self.sizePieces), anchor=NW, image=self.imageDrWho)
                             
                         #Si c'est un Dalek
                         elif(isinstance(self.parent.jeu.liste_objets[n], Dalek)):
-                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*32), 80+(y*32), anchor=NW, image=self.imageDalek)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*self.sizePieces), self.offSetY+(y*self.sizePieces), anchor=NW, image=self.imageDalek)
                             
                         #Si c'est un tas de ferraille
                         elif(isinstance(self.parent.jeu.liste_objets[n], Ferraille)):
-                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*32), 80+(y*32), anchor=NW, image=self.imageFerraille)
-                                    
-                        
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*self.sizePieces), self.offSetY+(y*self.sizePieces), anchor=NW, image=self.imageFerraille)
+
+    
+        self.boutonTeleportation.place(width=100, x=20, y=750)            
+        self.boutonZappeur.place(width=100, x=140, y=750)
+        self.surfaceJeu.create_text(350, 765, text='Points : '+str(self.parent.jeu.points), font=('Arial', 16), fill='white')
+        self.surfaceJeu.create_text(550, 765, text='Zappeur : '+str(jeu.liste_objets[0].nb_zapper), font=('Arial', 16), fill='white')
+        self.surfaceJeu.create_text(750, 765, text='Vague : '+str(jeu.vague), font=('Arial', 16), fill='white')
+        self.surfaceJeu.create_text(1000, 765, text='Daleks Restant : '+str(jeu.nb_dalek_restant)+'/'+str(jeu.nb_total_dalek), font=('Arial', 16), fill='white')
         
         
         
     def zapAnimation(self, jeu):
-        pass
+        """listeImage = []
+    	for ii in range(0,11):
+    	    listeImage.append(PhotoImage(file="explosion"+ str(ii) + ".gif"))
+
+    	for ii in range(0,11):
+    	    self.surfaceJeu.create_image(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32-32), 80+(self.parent.jeu.liste_objets[0].y*32-32), anchor=NW, image=listeImage[ii])
+    	    time.sleep(0.1)"""
     def splashNiveau(self, jeu):
         pass
     def getUserInputCode(self,event):
@@ -98,44 +119,54 @@ class Vue2:
         #Gestion du click de souris
 
         #Si le click est au Sud-Ouest du Docteur
-        if(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
+        if(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces))
+           and event.y > (self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)+self.sizePieces):
             keyCode = 1
 
         #Si le click est au Sud du Docteur
-        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
-             and event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32):
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces))
+             and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces)+self.sizePieces)
+             and event.y > (self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)+self.sizePieces):
             keyCode = 2
 
         #Si le click est au Sud-Est du Docteur   
-        elif(event.y > (80 + self.parent.jeu.liste_objets[0].y*32)+32 and event.x >(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)):
+        elif(event.y > (self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)+self.sizePieces
+             and event.x >(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces)+self.sizePieces)):
             keyCode = 3
 
         #Si le click est a l'Ouest du Docteur
-        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
-             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces))
+             and event.y >= (self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)
+             and event.y <= ((self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)+self.sizePieces)):
             keyCode = 4
 
         #Si le click est directement sur le Docteur
-        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
-             and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32) and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces))
+             and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces)+self.sizePieces)
+             and event.y >= (self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)
+             and event.y <= ((self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)+self.sizePieces)):
             keyCode = 5
             
         #Si le click est a l'Est du Docteur
-        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y >= (80 + self.parent.jeu.liste_objets[0].y*32)
-             and event.y <= ((80 + self.parent.jeu.liste_objets[0].y*32)+32)):
+        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces))+self.sizePieces)
+             and event.y >= (self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)
+             and event.y <= ((self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)+self.sizePieces)):
             keyCode = 6
 
         #Si le click est au Nord-Ouest du Docteur
-        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+        elif(event.x < (self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces))
+             and event.y < (self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)):
             keyCode = 7
 
         #Si le click est au Nord du Docteur
-        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)) and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32)+32)
-             and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+        elif(event.x >=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces))
+             and event.x <=(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces)+self.sizePieces)
+             and event.y < (self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)):
             keyCode = 8
 
         #Si le click est au Nord-Est du Docteur
-        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32))+32) and event.y < (80 + self.parent.jeu.liste_objets[0].y*32)):
+        elif(event.x > ((self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces))+self.sizePieces)
+             and event.y < (self.offSetY + self.parent.jeu.liste_objets[0].y*self.sizePieces)):
             keyCode = 9
             
         self.parent.turn(keyCode)
@@ -177,7 +208,7 @@ class Vue2:
         self.textBox.insert(INSERT,'Vous avez aussi l_habilete de vous teleporter aleatoirement n_importe quand avec la touche " * ", afin de pieger \nles Daleks\n\n')
         self.textBox.insert(INSERT,'Bonne chance Docteur. Ce n_est qu_une question de temps avant de vous voir succomber...\nSinon, si vous ne vous en croyez plus capable en plein milieu du jeu, appuyez sur "q" pour quitter\n\n\n\n')
 
-    def highScore(self):
+    def highScore(self, highScore):
         self.effacerFrame()
         self.labelBackground.place(x=0, y=0)
         self.boutonRetourMenu.place(width=self.buttonWidth, x=(self.root.winfo_width()-self.buttonWidth)/2, y=700)
@@ -185,11 +216,11 @@ class Vue2:
         self.textBox.insert(INSERT,'Les Daleks contre Dr. Who\n')
         self.textBox.insert(INSERT,'_________________________\n\n')
         self.textBox.insert(INSERT,'HighScores\n\n\n')
-        """if(hightScore):
+        if(hightScore):
             for i in highScore:
                self.textBox.insert(INSERT, i + '\n\n')
         else:
-            self.textBox.insert(INSERT,'Il n_y a pas encore de hightScores...\n\nA vous de jouer!!!')"""
+            self.textBox.insert(INSERT,'Il n_y a pas encore de hightScores...\n\nA vous de jouer!!!')
        
     def about(self):
         self.effacerFrame()
@@ -313,11 +344,11 @@ class Vue:
             if(y == 0):
                 print(' Points: '+str(jeu.points),end='') #Affiche les points
             elif(y == 1):
-                print(' Zappeur: '+str(jeu.liste_objets[0].nb_zapper),end='') #Affiche les points
+                print(' Zappeur: '+str(jeu.liste_objets[0].nb_zapper),end='') #Affiche le nombre de zappeurs
             elif(y == 2):
                 print(' Vague: '+str(jeu.vague),end='') #Affiche le numero de vague
             elif(y == 3):
-                print(' '+str(jeu.nb_dalek_restant)+'/'+str(jeu.nb_total_dalek),end='') #Affiche les points
+                print(' '+str(jeu.nb_dalek_restant)+'/'+str(jeu.nb_total_dalek),end='') #Affiche le nombre de daleks
                 
             print('')   #end line
         print('')   #end line
@@ -432,13 +463,13 @@ class Vue:
         print('\n\n\n\nQuitter?    oui[1] ou non[2]')
         return self.getUserInputCode()
 
-    def hightScore(self, hightScore):
+    def hightScore(self, highScore):
         os.system('cls')
         print('Les Daleks contre Dr. Who')
         print('_________________________\n')
         print('HightScores\n\n\n')
-        if(hightScore):
-            for i in hightScore:
+        if(highScore):
+            for i in highScore:
                 print(i + '\n\n')
         else:
             print('Il n_y a pas encore de hightScores...\n\nA vous de jouer!!!')
@@ -591,13 +622,13 @@ class Jeu:
                                 self.liste_objets.pop(i)
                                 break
 
-    def getHightScore(self):
+    def getHighScore(self):
         
         try:
             tampon = open("hight.Score", 'r+')#rb == read binary
-            hightScore = tampon.readlines()
+            highScore = tampon.readlines()
             tampon.close()
-            return hightScore
+            return highScore
         except:
             tampon = open("hight.Score", 'w+')#w == write
             tampon.close()
@@ -606,7 +637,7 @@ class Jeu:
 
 
     def setHightScore(self, name):
-        tampon = open("hight.Score", 'a')#ab == append binary
+        tampon = open("high.Score", 'a')#ab == append binary
         aEcrire = name + ';' + str(self.points) + '\n'
         tampon.write(aEcrire)
         tampon.close()
@@ -813,7 +844,20 @@ class Controleur:
         #Regarde si le deplacement est valide          
         valide = self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)
         
-        if(valide):
+        if(valide != 0):
+            
+            #Si on appuie sur le bouton Teleportation
+            if(valide == 10):
+                self.jeu.liste_objets[0].teleportation(self.jeu)
+            #Si on appuie sur le bouton Zappeur
+            if(valide == 11):
+                if(self.jeu.liste_objets[0].nb_zapper > 0):
+                    self.jeu.liste_objets[0].zapper(self.jeu)
+                    self.vue.zapAnimation(self.jeu)
+                else:
+                    return
+            
+            
             #Effectuer le deplacement des Daleks
             self.jeu.deplacerDalek(self.jeu)
 
