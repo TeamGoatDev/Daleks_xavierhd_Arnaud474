@@ -411,7 +411,7 @@ class Vue:
             print('_________________________\n\n\n')
             print('1. Jouer\n\n')
             print('2. Instruction\n\n')
-            print('3. HightScores\n\n')
+            print('3. HighScores\n\n')
             print('4. About\n\n')
             print('5. Quitter')
         
@@ -424,7 +424,7 @@ class Vue:
             elif (retourMenu == 2):
                 self.instruction()
             elif(retourMenu == 3):
-                self.hightScore(self.parent.jeu.getHightScore())
+                self.highScore(self.parent.jeu.getHighScore())
             elif (retourMenu == 4):
                 self.about()
             elif (retourMenu == 5):
@@ -464,7 +464,7 @@ class Vue:
         print('\n\n\n\nQuitter?    oui[1] ou non[2]')
         return self.getUserInputCode()
 
-    def hightScore(self, highScore):
+    def highScore(self, highScore):
         os.system('cls')
         print('Les Daleks contre Dr. Who')
         print('_________________________\n')
