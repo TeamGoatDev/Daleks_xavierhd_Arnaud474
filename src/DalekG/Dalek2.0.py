@@ -378,6 +378,7 @@ class Vue:
                 return 11
             elif key == b'q':
                 return 12
+        return 0
 
     def splashPasZapper(self):
         os.system('cls')
@@ -423,7 +424,7 @@ class Vue:
             elif (retourMenu == 2):
                 self.instruction()
             elif(retourMenu == 3):
-                self.parent.vue.hightScore(self.parent.jeu.getHightScore())
+                self.hightScore(self.parent.jeu.getHightScore())
             elif (retourMenu == 4):
                 self.about()
             elif (retourMenu == 5):
@@ -816,7 +817,7 @@ class Dalek:
 class Ferraille:
     def __init__(self, x, y):
         self.x = x  #Position en x sur la surface de jeu 
-        self.y = y; #Position en y sur la surface de jeu
+        self.y = y  #Position en y sur la surface de jeu
     
 
 class Controleur:
