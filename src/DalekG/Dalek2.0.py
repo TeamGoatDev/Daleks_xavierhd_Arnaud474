@@ -35,12 +35,20 @@ class Vue2:
         self.imageFerraille = PhotoImage(file="ferraille.gif")
         self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
         self.surfaceJeu.bind('<Button-1>', self.getUserInputCode)
+        
+
 
         #Loading des images explosives
-        listeImage = []
+        self.listeImage = []
         for ii in range(1,16):
-            listeImage.append(PhotoImage(file="explosion"+ str(ii) + ".gif"))
+            self.listeImage.append(PhotoImage(file="explosion"+ str(ii) + ".gif"))
             print("explosion"+ str(ii) + ".gif")
+        
+        self.listeImageOriginal = self.listeImage
+        self.imageSurfaceOriginal = self.imageSurface
+        self.imageDalekOriginal = self.imageDalek
+        self.imageDrWhoOriginal = self.imageDrWho
+        self.imageFerrailleOriginal = self.imageFerraille
         
         #Variable pour que les boutons soient tous de la meme grosseur
         self.buttonWidth= 400
@@ -57,8 +65,32 @@ class Vue2:
         
         self.textBox = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 18))
         self.gameOver = Text(width=self.root.winfo_width(), bg='black', fg='white', font=('Arial', 40))
+    
 
-        
+    """
+    Ceci est fonctionnel, mais je ne sais pas si c_est vraiment utile au programme.
+    def changerSizePiece(self, mod1, mod2):
+        self.sizePieces = self.sizePieces * mod1/mod2
+        for ii in range(0,15):
+            self.listeImage[ii] = self.listeImage[ii].zoom(mod1,mod1)
+            self.listeImage[ii] = self.listeImage[ii].subsample(mod2,mod2)
+
+        self.imageSurface = self.imageSurface.zoom(mod1,mod1)
+        self.imageDalek = self.imageDalek.zoom(mod1,mod1)
+        self.imageDrWho = self.imageDrWho.zoom(mod1,mod1)
+        self.imageFerraille = self.imageFerraille.zoom(mod1,mod1)
+        self.imageSurface = self.imageSurface.subsample(mod2,mod2)
+        self.imageDalek = self.imageDalek.subsample(mod2,mod2)
+        self.imageDrWho = self.imageDrWho.subsample(mod2,mod2)
+        self.imageFerraille = self.imageFerraille.subsample(mod2,mod2)
+
+    def resetSizePiece(self):
+        self.listeImage = self.listeImageOriginal
+        self.imageSurface = self.imageSurfaceOriginal
+        self.imageDalek = self.imageDalekOriginal
+        self.imageDrWho = self.imageDrWhoOriginal
+        self.imageFerraille = self.imageFerrailleOriginal"""
+
     def afficher(self, jeu):
         
         #Effacage initial du frame pour pouvoir 
@@ -264,8 +296,7 @@ class Vue2:
 
 #Declaration des objets
 class Vue:
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self):
         os.system('mode con:cols=125 lines=60')
     
     #Fonction qui fait l'affichage de jeu dans la console
@@ -277,27 +308,27 @@ class Vue:
         #Affichage du terrain 
         for y in range(0,jeu.surface_h):
             for x in range(0, jeu.surface_l):
-
                 case_vide = True
                 
                 #Regarde dans la liste si il y a un element a cette position
-                for n in range(0, jeu.nb_total_objets):
-                    
+                for n in range(0, jeu.nb_total_objets-1):
                     #Si la case courante correspond a la case de la liste
                     if(x == jeu.liste_objets[n].x and y == jeu.liste_objets[n].y):
+
                         #Si c'est le docteur who
                         if(n==0):
                             print(chr(1),end='')
+                            break
                         #Si c'est un Dalek
                         elif(isinstance(jeu.liste_objets[n], Dalek)):
                             print(chr(177),end='')
+                            break
                         #Si c'est un tas de ferraille
                         elif(isinstance(jeu.liste_objets[n], Ferraille)):
                             print('#',end='')
+                            break
                         
-                        case_vide = False
-                   
-                if(case_vide == True):
+                else:
                     print('-',end='')
             if(y == 0):
                 print(' Points: '+str(jeu.points),end='') #Affiche les points
@@ -311,6 +342,12 @@ class Vue:
                 
             print('')   #end line
         print('')   #end line
+
+
+    def changerSizePiece(self, mod1, mod2):
+        pass
+    def resetSizePiece():
+        pass
 
     def zapAnimation(self, jeu):
         
@@ -406,7 +443,7 @@ class Vue:
         
             
 
-    def menu(self):
+    def menu(self,parent):
 
         while (True):#boucle infini tant que le retour de la fonction nest pas appele
             os.system('cls')
@@ -423,11 +460,11 @@ class Vue:
             if (retourMenu == 1):
                 retour = b'1'
                 while(retour == b'1'):
-                    retour = self.parent.gameLOOP()
+                    retour = parent.gameLOOP()
             elif (retourMenu == 2):
                 self.instruction()
             elif(retourMenu == 3):
-                self.highScore(self.parent.jeu.getHighScore())
+                self.highScore(parent.jeu.getHighScore())
             elif (retourMenu == 4):
                 self.about()
             elif (retourMenu == 5):
@@ -506,25 +543,29 @@ class Jeu:
         self.denombreObjet()
         self.denombreDalek()
         self.vague += 1
-        if(self.vague%5 == 0):
+        if(self.vague%15 == 2):
             self.surface_l += 1
+            self.surface_h += 1
+            """if(self.vague%45 == 2):
+                self.parent.vue.changerSizePiece(20,11)"""
         self.liste_objets[0].nb_zapper += 1
         self.nb_total_objets = len(self.liste_objets)   #Calcule le nombre d'objet dans la liste
 
     def reset(self):
-        self.points = 0                 
-        self.vague = 0                  
-        self.nb_dalek_restant = 0     
-        self.nb_total_dalek = 0         
-        self.nb_total_objets = 0        
-        self.liste_objets[:] = []         
+        self.points = 0
+        self.vague = 0
+        self.nb_dalek_restant = 0
+        self.nb_total_dalek = 0
+        self.nb_total_objets = 0
+        self.liste_objets[:] = []
         self.surface_l = 30
-        self.surface_h = 20  
+        self.surface_h = 20
+        #self.parent.vue.resetSizePiece()
 
-    def deplacerDalek(self,jeu):
+    def deplacerDalek(self):
         for i in range(1, self.nb_total_objets): #regarde tout les objets de la liste
                 if(isinstance(self.liste_objets[i], Dalek)): #recherche d_objet Dalek
-                    self.liste_objets[i].deplacer(jeu)
+                    self.liste_objets[i].deplacer(self)
     
     def denombreDalek(self):
         self.nb_dalek_restant = 0
@@ -780,7 +821,7 @@ class DrWho:
 class Dalek:
     def __init__(self, x, y, valeurPoint):
         self.x = x  #Position en x sur la surface de jeu 
-        self.y = y; #Position en y sur la surface de jeu
+        self.y = y #Position en y sur la surface de jeu
         self.valeurPoint = valeurPoint
         #possibilite d'ajouter des attributs de "super dalek"
 
@@ -825,9 +866,10 @@ class Controleur:
         self.jeu = Jeu(self)
         try:
             if(sys.argv[1] == '-shell'):#argument 0 est le nom du fichier, le 1 est le parametre entrer qui le suit.
-                self.vue = Vue(self)
-                self.vue.menu()
-        except:
+                self.vue = Vue()
+                self.vue.menu(self)
+        except ChildProcessError as e:
+            print(e.args)
             self.vue = Vue2(self)
             self.vue.menu()
             self.vue.root.mainloop() 
@@ -885,7 +927,7 @@ class Controleur:
             if(self.vue.questionQuitterEnPartie() == 1):
                 return 2
         
-        self.jeu.deplacerDalek(self.jeu) #Deplacement automatique des Dalek
+        self.jeu.deplacerDalek() #Deplacement automatique des Dalek
         self.jeu.collision() #Verifie les collisions
         self.jeu.denombreDalek()
 
@@ -896,7 +938,6 @@ class Controleur:
                 return self.vue.endGame(self.jeu, True)
 
         self.vue.afficher(self.jeu) #Affichage de la surface de jeu
-        
         return 1 #Tout est aller comme il faut
 
 
