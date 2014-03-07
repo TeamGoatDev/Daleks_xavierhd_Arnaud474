@@ -35,6 +35,12 @@ class Vue2:
         self.imageFerraille = PhotoImage(file="ferraille.gif")
         self.surfaceJeu = Canvas(self.root, width=self.root.winfo_width(), height=self.root.winfo_height(), bg="black")
         self.surfaceJeu.bind('<Button-1>', self.getUserInputCode)
+
+        #Loading des images explosives
+        listeImage = []
+        for ii in range(1,16):
+            listeImage.append(PhotoImage(file="explosion"+ str(ii) + ".gif"))
+            print("explosion"+ str(ii) + ".gif")
         
         #Variable pour que les boutons soient tous de la meme grosseur
         self.buttonWidth= 400
@@ -76,7 +82,6 @@ class Vue2:
                     
                     #Si la case courante correspond a la case de la liste
                     if(x == self.parent.jeu.liste_objets[n].x and y == self.parent.jeu.liste_objets[n].y):
-
                         print(self.parent.jeu.liste_objets[n].x, self.parent.jeu.liste_objets[n].y)
                         
                         #Si c'est le docteur who
@@ -102,15 +107,15 @@ class Vue2:
         
         
     def zapAnimation(self, jeu):
-        """listeImage = []
-    	for ii in range(0,11):
-    	    listeImage.append(PhotoImage(file="explosion"+ str(ii) + ".gif"))
 
-    	for ii in range(0,11):
-    	    self.surfaceJeu.create_image(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*32-32), 80+(self.parent.jeu.liste_objets[0].y*32-32), anchor=NW, image=listeImage[ii])
-    	    time.sleep(0.1)"""
+        for ii in range(1,15):
+            self.afficher(jeu)
+            self.surfaceJeu.create_image(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces-self.sizePieces), self.offSetY+(self.parent.jeu.liste_objets[0].y*self.sizePieces-self.sizePieces), anchor=NW, image = self.listeImage[ii])
+            time.sleep(0.3)
+
     def splashNiveau(self, jeu):
         pass
+
     def getUserInputCode(self,event):
         print(event.x, event.y)
         
@@ -174,7 +179,8 @@ class Vue2:
 
     def splashPasZapper(self):
         pass
-    def endGame(self):
+
+    def endGame(self, jeu, scoreDejaEntre = False):
         self.surfaceJeu.place_forget()
         self.effacerFrame()
         self.labelBackground.place(x=0, y=0)
@@ -352,6 +358,7 @@ class Vue:
                 
             print('')   #end line
         print('')   #end line
+        time.sleep(0.5)#afin de voir les petits caractere de zap plus d_une microseconde
 
     def splashNiveau(self, jeu):
         os.system('cls')
@@ -360,11 +367,6 @@ class Vue:
         print('Points : '+str(jeu.points))
         time.sleep(2)
 
-
-
-    def getUserInput(self):
-        
-        return msvcrt.getch()
 
     def getUserInputCode(self):
         
@@ -396,9 +398,10 @@ class Vue:
 
         retour = self.getUserInputCode()
 
-        if(retour == b'4'):
-            self.parent.jeu.setHightScore(self.getUserName(self.parent.jeu))
-        elif(retour == b'1'):
+        if(not scoreDejaEntre and retour == 4):
+            self.parent.jeu.setHightScore(self.getUserName(self.parent.jeu.score))
+            self.endGame(jeu,True)
+        if(retour == 2 or retour == 3):
             return retour
         
             
@@ -481,7 +484,7 @@ class Vue:
     def getUserName(self, jeu):
         os.system('cls')
         print('Score : '+str(jeu.points))
-        return input("Entrez votre nom : ")
+        return raw_input("Entrez votre nom : ")
 
 
 
@@ -709,73 +712,69 @@ class DrWho:
     def deplacer(self, jeu, key):
 
         var = 1#variable pour augmenter la largeure du déplacement du joueur
+        #Variables pour la variation de x et y
+        v_x = 0
+        v_y = 0
+        
+        #Deplacement vers le bas a gauche
+        if(key == 1):
+            v_x = -var
+            v_y = var
+        
+        #Deplacement vers le bas
+        if(key == 2):
+            v_x = 0
+            v_y = var
 
-        if(key == 10 or key == 11 or key == 12):#Teleportation #Zappeur
-            return key
-        else:
-            #Variables pour la variation de x et y
+        #Deplacement vers le bas a droite
+        if(key == 3):
+            v_x = var
+            v_y = var
+
+        #Pas de deplacement
+        if(key == 5):
             v_x = 0
             v_y = 0
-            
-            #Deplacement vers le bas a gauche
-            if(key == 1):
-                v_x = -var
-                v_y = var
-            
-            #Deplacement vers le bas
-            if(key == 2):
-                v_x = 0
-                v_y = var
 
-            #Deplacement vers le bas a droite
-            if(key == 3):
-                v_x = var
-                v_y = var
+        #Depplacement vers la droite
+        if(key == 6):
+            v_x = var
+            v_y = 0
 
-            #Pas de deplacement
-            if(key == 5):
-                v_x = 0
-                v_y = 0
+        #Deplacement vers le haut a droite
+        if(key == 9):
+            v_x = var
+            v_y = -var
 
-            #Depplacement vers la droite
-            if(key == 6):
-                v_x = var
-                v_y = 0
+        #Deplacement vers le haut
+        if(key == 8):
+            v_x = 0
+            v_y = -var
 
-            #Deplacement vers le haut a droite
-            if(key == 9):
-                v_x = var
-                v_y = -var
+        #Deplacement vers le haut a gauche
+        if(key == 7):
+            v_x = -var
+            v_y = -var
 
-            #Deplacement vers le haut
-            if(key == 8):
-                v_x = 0
-                v_y = -var
-
-            #Deplacement vers le haut a gauche
-            if(key == 7):
-                v_x = -var
-                v_y = -var
-
-            #Deplacement vers la gauche
-            if(key == 4):
-                v_x = -var
-                v_y = 0
+        #Deplacement vers la gauche
+        if(key == 4):
+            v_x = -var
+            v_y = 0
 
 
-            #Determine si le deplacement sera a l'interieur de la zone de jeu
-            if(jeu.liste_objets[0].x+v_x < jeu.surface_l and jeu.liste_objets[0].y+v_y < jeu.surface_h and jeu.liste_objets[0].x+v_x >= 0 and jeu.liste_objets[0].y+v_y >= 0):
-                for i in range(1, jeu.nb_total_objets):
-                    #Determine si il y a une piece sur l'endroit ou le joueur veut se deplacer
-                    if(jeu.liste_objets[0].x+v_x == jeu.liste_objets[i].x and jeu.liste_objets[0].y+v_y == jeu.liste_objets[i].y):
-                        return 0
-                else:
-                    #Change la position du Docteur Who lorsque le deplacement est valide       
-                    jeu.liste_objets[0].x += v_x
-                    jeu.liste_objets[0].y += v_y
-                    return 1
-            else:    
-                return 0
+        #Determine si le deplacement sera a l'interieur de la zone de jeu
+        if(jeu.liste_objets[0].x+v_x < jeu.surface_l and jeu.liste_objets[0].y+v_y < jeu.surface_h and jeu.liste_objets[0].x+v_x >= 0 and jeu.liste_objets[0].y+v_y >= 0):
+            for i in range(1, jeu.nb_total_objets):
+                #Determine si il y a une piece sur l'endroit ou le joueur veut se deplacer
+                if(jeu.liste_objets[0].x+v_x == jeu.liste_objets[i].x and jeu.liste_objets[0].y+v_y == jeu.liste_objets[i].y):
+                    return 0
+            else:
+                #Change la position du Docteur Who lorsque le deplacement est valide       
+                jeu.liste_objets[0].x += v_x
+                jeu.liste_objets[0].y += v_y
+                return 1
+        else:    
+            return 0
 
 
 class Dalek:
@@ -832,128 +831,73 @@ class Controleur:
             self.vue = Vue2(self)
             self.vue.menu()
             self.vue.root.mainloop() 
-            
-         
+
 
     def newGame(self):
         self.jeu.reset()
         self.jeu.setNextVague()
         self.vue.afficher(self.jeu)
 
-    def turn(self, keyCode):
-
-        #Regarde si le deplacement est valide          
-        valide = self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)
-        
-        if(valide != 0):
-            
-            #Si on appuie sur le bouton Teleportation
-            if(valide == 10):
-                self.jeu.liste_objets[0].teleportation(self.jeu)
-            #Si on appuie sur le bouton Zappeur
-            if(valide == 11):
-                if(self.jeu.liste_objets[0].nb_zapper > 0):
-                    self.jeu.liste_objets[0].zapper(self.jeu)
-                    self.vue.zapAnimation(self.jeu)
-                else:
-                    return
-            
-            
-            #Effectuer le deplacement des Daleks
-            self.jeu.deplacerDalek(self.jeu)
-
-            #Fonction qui gere les collisions entre les Daleks
-            self.jeu.collision()
-
-            #Regarde le nombre de Daleks restants
-            self.jeu.denombreDalek()
-
-            #Regarde si le docteur est mort
-            if (self.jeu.liste_objets[0].notDead(self.jeu) == False):
-                self.vue.endGame()
-                return
-            
-            #Regarde si il reste encore des Daleks
-            if(self.jeu.nb_dalek_restant == 0):
-                self.jeu.setNextVague()
-            
-            self.vue.afficher(self.jeu)
-
-        
-        
 
     def gameLOOP(self):
 
         self.jeu.reset()
-        drWhoIsNotDead = True
+        continuer = 1           #Afin de savoir si le controleur doit redonner le tour au joueur pour un faux mouvement
+            
+        while (continuer == 1):  #Verifie si il ne reste plus de daleks ou verifie si le joueur a ete capturer
 
-        while drWhoIsNotDead:
-             #Preparation de la prochaine vague, incremente les dalek, zappeur, et autre goodies.
-            #et cree une liste d'objet contenant les dalek et le docteur
-            self.jeu.setNextVague()
+            continuer = 0
+           
+            while (not continuer):
+                #Affichage de la surface de jeu
+                self.vue.afficher(self.jeu)
+                keyCode = self.vue.getUserInputCode()#retourne la touche appuyer par le joueur
+                continuer = self.turn(keyCode)     
+
+
+    def turn(self,keyCode): #type de retour accepter : 0 = recommencer, 1 = continuer, 2 = quitter,
+
+        if(self.jeu.nb_dalek_restant == 0):
+            self.jeu.setNextVague()#Preparation de la prochaine vague, incremente les dalek, zappeur, et autre goodies. Et cree une liste d'objet contenant les dalek et le docteur
             self.vue.splashNiveau(self.jeu)
 
-            #Verifie si il ne reste plus de daleks ou verifie si le joueur a ete capturer
-            while (drWhoIsNotDead == True and self.jeu.nb_dalek_restant != 0):
-                continuer = self.runLevel()
-                self.jeu.denombreDalek()
-                drWhoIsNotDead = self.jeu.liste_objets[0].notDead(self.jeu)       
-                if(not continuer):
-                    if(self.vue.questionQuitterEnPartie() == 1):
-                        return None
-        else:
+        #Action du joueur :
+
+        if(keyCode == 0): #code pas valide
+            return 0
+
+        elif(keyCode >= 1 and keyCode <= 9):
+            self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)     #Deplacement du DrWho
+        
+        elif(keyCode == 10):
+            if(self.jeu.liste_objets[0].teleportation(self.jeu)):    #Teleportation du DrWho
+                return 0 #si la teleportation retourne True
+
+        elif(keyCode == 11):                                #Zappeur du DrWho
+            if(self.jeu.liste_objets[0].nb_zapper > 0):
+                self.jeu.liste_objets[0].zapper(self.jeu)   #Le zap de drwho logique 
+                self.vue.zapAnimation(self.jeu)             #Affichage du zap sur l_espace de jeu (le zap de drwho graphique)
+            else:
+                self.vue.splashPasZapper()
+                return 0
+
+        elif(keyCode == 12):                                #Pour quitter en pleine partie
+            if(self.vue.questionQuitterEnPartie() == 1):
+                return 2
+        
+        self.jeu.deplacerDalek(self.jeu) #Deplacement automatique des Dalek
+        self.jeu.collision() #Verifie les collisions
+        self.jeu.denombreDalek()
+
+        if (not self.jeu.liste_objets[0].notDead(self.jeu)):
             if(self.jeu.points > 0):
                 return self.vue.endGame(self.jeu)
-                
+            else:
+                return self.vue.endGame(self.jeu, True)
 
-            #return self.vue.endGame(self.jeu, True) #score deja entree
-
-
-    def runLevel(self):
+        self.vue.afficher(self.jeu) #Affichage de la surface de jeu
         
-        recommencer = True #Afin de savoir si le controleur doit redonner le tour au joueur pour un faux mouvement
-
-        while (recommencer):
-
-            #Affichage de la surface de jeu
-            self.vue.afficher(self.jeu)
-            
-            recommencer = False
-            
-            #Deplacement du joueur
-            retour = self.jeu.liste_objets[0].deplacer(self.jeu, self.vue.getUserInputCode()) #retourne la touche special appuyer par le joueur ou change sa position si touche normal
-            
-            if(retour == 10):#teleportation
-                recommencer = self.jeu.liste_objets[0].teleportation(self.jeu)
-
-            elif(retour == 11):#zappeur
-                if(self.jeu.liste_objets[0].nb_zapper > 0):
-                    self.jeu.liste_objets[0].zapper(self.jeu)#suppressionDalek supprime les elements qui sont retourner par la fonction qu_elle a en parametre (le zap de drwho) 
-                    self.vue.zapAnimation(self.jeu) #Affichage du zap sur l'espace de jeu
-                    time.sleep(0.5)
-                else:
-                    self.vue.splashPasZapper()
-                    recommencer = True
-            elif(retour == 0):
-                recommencer = True
-            elif(retour == 12):   #pour quitter en pleine partie
-                return False
-
-        #Affichage de la surface de jeu
-        self.vue.afficher(self.jeu)
-
-        """#Afficher les positions a des fin de debugage
-        for i in range(0, self.jeu.nb_total_objets):
-            print(self.jeu.liste_objets[i].x, self.jeu.liste_objets[i].y)"""
-        
-        
-        #Deplacement automatique des Daleks
-        self.jeu.deplacerDalek(self.jeu)
-
-        #Verifie les collisions
-        self.jeu.collision()
-        
-        return True #Tout est aller comme il faut
+        return 1 #Tout est aller comme il faut
 
 
 if __name__ == "__main__":
