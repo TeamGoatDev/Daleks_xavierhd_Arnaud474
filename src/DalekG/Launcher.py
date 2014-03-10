@@ -13,7 +13,7 @@ class Affichage():
         self.root.update()
 
         #Background pour le menu
-        self.imageBackground = PhotoImage(file="bg.gif")
+        self.imageBackground = PhotoImage(file="Image/bg.gif")
         self.labelBackground = Label(self.root,image=self.imageBackground)
 
         #Boutons
