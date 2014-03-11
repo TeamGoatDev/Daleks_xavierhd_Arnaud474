@@ -393,7 +393,7 @@ class Vue:
 
     def changerSizePiece(self, mod1, mod2):
         pass
-    def resetSizePiece():
+    def resetSizePiece(self):
         pass
 
     def zapAnimation(self, jeu):
@@ -478,15 +478,14 @@ class Vue:
         print('Points : '+str(jeu.points))
         if(not scoreDejaEntre):
             print('\n\nAppuyer sur 4 pour enregistrer votre score')
-        print('\n\n\n\nVoulez-vous recommencer une partie? oui[2] ou non[3]')
-
+            print('\n\n\n\nAppuyer sur une touche (sauf 4) pour revenir au menu principal')
+        else:
+            print('\n\n\n\nAppuyer sur une touche pour revenir au menu principal')
         retour = self.getUserInputCode()
 
         if(not scoreDejaEntre and retour == 4):
             jeu.setHighScore(self.getUserName(jeu))
             return self.endGame(jeu,True)
-        if(retour == 2 or retour == 3):
-            return retour
         
             
 
