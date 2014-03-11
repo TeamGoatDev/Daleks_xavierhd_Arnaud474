@@ -586,7 +586,6 @@ class Jeu:
     def setNextVague(self):
         self.nb_total_dalek += 5
         self.creerListe()   #Creation de la liste pour la nouvelle vague
-        self.denombreObjet()
         self.denombreDalek()
         self.vague += 1
         if(self.vague%15 == 14):
@@ -903,8 +902,8 @@ class Controleur:
             if(sys.argv[1] == '-shell'):#argument 0 est le nom du fichier, le 1 est le parametre entrer qui le suit.
                 self.vue = Vue()
                 self.vue.menu(self)
-        except ChildProcessError as e:
-            print(e.args)
+        except :#ChildProcessError as e:
+            #print(e.args)
             self.vue = Vue2(self)
             self.vue.menu()
             self.vue.root.mainloop() 
