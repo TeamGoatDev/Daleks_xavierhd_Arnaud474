@@ -103,6 +103,9 @@ class Vue2:
         self.effacerFrame()
         #Creation de l'image pour la surface de jeu et ajout du canevas
         self.surfaceJeu.create_image(0,0, anchor=NW, image=self.imageSurface)
+        self.boutonTeleportation.place(width=100, x=20, y=750)            
+        self.boutonZappeur.place(width=100, x=140, y=750)
+        self.boutonQuitterPartie.place(width=50, x=270, y=750)
     
     def retourAuJeu(self):
         self.setBackground()
@@ -145,13 +148,11 @@ class Vue2:
                             self.surfaceJeu.create_image(self.trouverDepartX()+(x*self.sizePieces), self.offSetY+(y*self.sizePieces), anchor=NW, image=self.imageFerraille)
 
     
-        self.boutonTeleportation.place(width=100, x=20, y=750)            
-        self.boutonZappeur.place(width=100, x=140, y=750)
-        self.boutonQuitterPartie.place(width=50, x=270, y=750)
-        self.surfaceJeu.create_text(380, 765, text='Points : '+str(self.parent.jeu.points), font=('Arial', 16), fill='white')
-        self.surfaceJeu.create_text(580, 765, text='Zappeur : '+str(jeu.liste_objets[0].nb_zapper), font=('Arial', 16), fill='white')
-        self.surfaceJeu.create_text(780, 765, text='Vague : '+str(jeu.vague), font=('Arial', 16), fill='white')
-        self.surfaceJeu.create_text(1000, 765, text='Daleks Restant : '+str(jeu.nb_dalek_restant)+'/'+str(jeu.nb_total_dalek), font=('Arial', 16), fill='white')
+       
+        self.surfaceJeu.create_text(380, 765, text='Points : '+str(self.parent.jeu.points), font=('Arial', 16), fill='white', tags="pieces")
+        self.surfaceJeu.create_text(580, 765, text='Zappeur : '+str(jeu.liste_objets[0].nb_zapper), font=('Arial', 16), fill='white', tags="pieces")
+        self.surfaceJeu.create_text(780, 765, text='Vague : '+str(jeu.vague), font=('Arial', 16), fill='white', tags="pieces")
+        self.surfaceJeu.create_text(1000, 765, text='Daleks Restant : '+str(jeu.nb_dalek_restant)+'/'+str(jeu.nb_total_dalek), font=('Arial', 16), fill='white', tags="pieces")
         
         
         
