@@ -155,7 +155,12 @@ class Vue2:
             time.sleep(0.028)#temps d_affichage de chaque frame
 
     def splashNiveau(self, jeu):
-        pass
+        self.gameOver.delete(1.0, END)
+        self.gameOver.place(height=100, x=0, y=self.root.winfo_height()/2)
+        self.gameOver.insert(INSERT,"Nouveau niveau!!!")
+        self.root.update()
+        time.sleep(0.7)
+        self.afficher(self.parent.jeu)
 
     def getUserInputCode(self,event):
         print(event.x, event.y)
@@ -219,7 +224,14 @@ class Vue2:
 
 
     def splashPasZapper(self):
-        pass
+
+        self.gameOver.delete(1.0, END)
+        self.gameOver.place(height=100, x=0, y=self.root.winfo_height()/2)
+        self.gameOver.insert(INSERT,"Action Impossible!!!")
+        self.root.update()
+        time.sleep(0.7)
+        self.afficher(self.parent.jeu)
+
 
     def endGame(self, jeu, scoreDejaEntre = False):
         self.surfaceJeu.place_forget()
@@ -774,8 +786,8 @@ class DrWho:
         else:
             self.x = x
             self.y = y
-            return False #ca a marcher
-        return True    #ca n_a pas marcher
+            return True #ca a marcher
+        return False    #ca n_a pas marcher
 
 
 
@@ -944,11 +956,11 @@ class Controleur:
             return 0
 
         elif(keyCode >= 1 and keyCode <= 9):
-            self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)     #Deplacement du DrWho
-        
+            if(not self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)):     #Deplacement du DrWho donc : si le docteur n_a pas pu ce deplacer...
+                return 0
         elif(keyCode == 10):
-            if(self.jeu.liste_objets[0].teleportation(self.jeu)):    #Teleportation du DrWho
-                return 0 #si la teleportation retourne True
+            if(not self.jeu.liste_objets[0].teleportation(self.jeu)):    #Teleportation du DrWho donc : si le docteur n_a pas pu se teleporter...
+                return 0
 
         elif(keyCode == 11):                                #Zappeur du DrWho
             if(self.jeu.liste_objets[0].nb_zapper > 0):
@@ -956,6 +968,7 @@ class Controleur:
                 self.vue.zapAnimation(self.jeu)             #Affichage du zap sur l_espace de jeu (le zap de drwho graphique)
             else:
                 self.vue.splashPasZapper()
+                self.vue.afficher(self.jeu)
                 return 0
 
         elif(keyCode == 12):                                #Pour quitter en pleine partie
