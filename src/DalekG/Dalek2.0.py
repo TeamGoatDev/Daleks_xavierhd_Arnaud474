@@ -71,7 +71,7 @@ class Vue2:
         self.boutonWriteHighScore = Button(self.root, text='Enregistrer', width=100, bg='black', fg='white', activebackground='blue', activeforeground='white', command=lambda: self.menu(self.parent.jeu.setHighScore(self.userStringInput.get(1.0,END))) )
 
         self.boutonOui = Button(self.root, text='Oui', width=50, bg='black', fg='white', activebackground='blue', activeforeground='white', command= self.menu)
-        self.boutonNon = Button(self.root, text='Non', width=50, bg='black', fg='white', activebackground='blue', activeforeground='white', command= lambda: self.afficher(self.parent.jeu))
+        self.boutonNon = Button(self.root, text='Non', width=50, bg='black', fg='white', activebackground='blue', activeforeground='white', command= self.retourAuJeu)
         
         
     
@@ -99,13 +99,21 @@ class Vue2:
         self.imageDrWho = self.imageDrWhoOriginal
         self.imageFerraille = self.imageFerrailleOriginal
 
+    def setBackground(self):
+        self.effacerFrame()
+        #Creation de l'image pour la surface de jeu et ajout du canevas
+        self.surfaceJeu.create_image(0,0, anchor=NW, image=self.imageSurface)
+    
+    def retourAuJeu(self):
+        self.setBackground()
+        self.afficher(self.parent.jeu)
+    
     def afficher(self, jeu):
         
         #Effacage initial du frame pour pouvoir 
-        self.effacerFrame()
+        self.surfaceJeu.delete("pieces")
         
-        #Creation de l'image pour la surface de jeu et ajout du canevas
-        self.surfaceJeu.create_image(0,0, anchor=NW, image=self.imageSurface)
+       
 
         #Test pour la premiere position ainsi que le fonctionnement d'une image dans un canevas
         #self.surfaceJeu.create_image(self.trouverDepartX(), 100, anchor=NW, image=self.imageDalek)
@@ -126,11 +134,11 @@ class Vue2:
                         
                         #Si c'est le docteur who
                         if(isinstance(objet, DrWho)):
-                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*self.sizePieces), self.offSetY+(y*self.sizePieces), anchor=NW, image=self.imageDrWho)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*self.sizePieces), self.offSetY+(y*self.sizePieces), anchor=NW, tags="pieces", image=self.imageDrWho)
                             
                         #Si c'est un Dalek
                         elif(isinstance(objet, Dalek)):
-                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*self.sizePieces), self.offSetY+(y*self.sizePieces), anchor=NW, image=self.imageDalek)
+                            self.surfaceJeu.create_image(self.trouverDepartX()+(x*self.sizePieces), self.offSetY+(y*self.sizePieces), anchor=NW, tags="pieces", image=self.imageDalek)
                             
                         #Si c'est un tas de ferraille
                         elif(isinstance(objet, Ferraille)):
@@ -150,9 +158,11 @@ class Vue2:
     def zapAnimation(self, jeu):
 
         for ii in self.listeImage:
-            self.surfaceJeu.create_image(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces-self.sizePieces), self.offSetY+(self.parent.jeu.liste_objets[0].y*self.sizePieces-self.sizePieces), anchor=NW, image = ii)
+            self.surfaceJeu.create_image(self.trouverDepartX()+(self.parent.jeu.liste_objets[0].x*self.sizePieces-self.sizePieces), self.offSetY+(self.parent.jeu.liste_objets[0].y*self.sizePieces-self.sizePieces), anchor=NW, tags="explosion", image = ii)
             self.root.update()
-            time.sleep(0.028)#temps d_affichage de chaque frame
+            time.sleep(0.025)#temps d_affichage de chaque frame
+            self.surfaceJeu.delete("explosion")
+            
 
     def splashNiveau(self, jeu):
         self.gameOver.delete(1.0, END)
@@ -160,6 +170,7 @@ class Vue2:
         self.gameOver.insert(INSERT,"Nouveau niveau!!!")
         self.root.update()
         time.sleep(0.7)
+        self.setBackground()
         self.afficher(self.parent.jeu)
 
     def getUserInputCode(self,event):
@@ -224,14 +235,13 @@ class Vue2:
 
 
     def splashPasZapper(self):
-
         self.gameOver.delete(1.0, END)
         self.gameOver.place(height=100, x=0, y=self.root.winfo_height()/2)
         self.gameOver.insert(INSERT,"Action Impossible!!!")
         self.root.update()
         time.sleep(0.7)
+        self.setBackground()
         self.afficher(self.parent.jeu)
-
 
     def endGame(self, jeu, scoreDejaEntre = False):
         self.surfaceJeu.place_forget()
@@ -786,7 +796,7 @@ class DrWho:
         else:
             self.x = x
             self.y = y
-            return True #ca a marcher
+            return True#ca a marcher
         return False    #ca n_a pas marcher
 
 
@@ -923,6 +933,7 @@ class Controleur:
     def newGame(self):
         self.jeu.reset()
         self.jeu.setNextVague()
+        self.vue.setBackground()
         self.vue.afficher(self.jeu)
 
 
@@ -958,17 +969,18 @@ class Controleur:
         elif(keyCode >= 1 and keyCode <= 9):
             if(not self.jeu.liste_objets[0].deplacer(self.jeu, keyCode)):     #Deplacement du DrWho donc : si le docteur n_a pas pu ce deplacer...
                 return 0
+        
         elif(keyCode == 10):
             if(not self.jeu.liste_objets[0].teleportation(self.jeu)):    #Teleportation du DrWho donc : si le docteur n_a pas pu se teleporter...
                 return 0
 
         elif(keyCode == 11):                                #Zappeur du DrWho
             if(self.jeu.liste_objets[0].nb_zapper > 0):
-                self.jeu.liste_objets[0].zapper(self.jeu)   #Le zap de drwho logique 
                 self.vue.zapAnimation(self.jeu)             #Affichage du zap sur l_espace de jeu (le zap de drwho graphique)
+                self.jeu.liste_objets[0].zapper(self.jeu)   #Le zap de drwho logique 
             else:
                 self.vue.splashPasZapper()
-                self.vue.afficher(self.jeu)
+                
                 return 0
 
         elif(keyCode == 12):                                #Pour quitter en pleine partie
